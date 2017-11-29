@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="jzw_simple_progress" parent="Theme.AppCompat.Dialog">
+        <!--背景是否模糊-->
+        <item name="android:backgroundDimEnabled">true</item>
+        <!--背景色-->
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <!--是否有遮盖，不设置-->
+        <item name="android:windowContentOverlay">@null</item>
+        <!--window提示框是否是浮动的-->
+        <item name="android:windowIsFloating">true</item>
+        <!--设置边框-->
+        <item name="android:windowFrame">@null</item>
+        <!--是否是透明-->
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <!--设置progressbar的颜色-->
+        <item name="colorAccent">#258fe7</item>
+    </style>
+</resources>
