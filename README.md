@@ -14,11 +14,11 @@
       }
     }
 
- compile 'com.jzw.net:retrofit:1.0.1' 引入即可。
+ compile 'com.jzw.net:retrofitclient:1.1.1' 引入即可。
  
  2.jcenter方式
  
- compile 'com.jzw.net:retrofit:1.0.1' 直接引入即可。
+ compile 'com.jzw.net:retrofitclient:1.1.1' 直接引入即可。
 
  代码中如何使用：
 
