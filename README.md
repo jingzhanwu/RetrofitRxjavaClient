@@ -1,4 +1,4 @@
-# RetrofitClient
+# RetrofitRxjavaClient
 这是一个使用Retrofit2 + Rxjava2 + Rxandroid + okhttp3封装的一个简易型的网络请求库，第一次在项目上使用这些新技术，写的不好，还希望大家多提宝贵意见。
 
  如何引入：
@@ -14,11 +14,11 @@
       }
     }
 
- compile 'com.jzw.net:retrofit:1.2.0' 引入即可。
+ compile 'com.jzw.net:retrofit:1.0.1' 引入即可。
  
  2.jcenter方式
  
- compile 'com.jzw.net:retrofit:1.2.0' 直接引入即可。
+ compile 'com.jzw.net:retrofit:1.0.1' 直接引入即可。
 
  代码中如何使用：
 
