@@ -2,11 +2,15 @@ package com.jzw.retrofit.base;
 
 
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.Observable;
 import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.FieldMap;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
@@ -34,4 +38,14 @@ public interface ApiService {
 
     @POST("")
     Observable<String> uploadFile2(@Body MultipartBody body);
+
+
+    /**
+     * 获取处警单列表
+     *
+     * @return
+     */
+    @POST("/dispatchAlarm/findAlarmByCondition")
+    Call<ResultBase<PoliceInfo>> getPoliceList(@Body RequestBody json);
+
 }

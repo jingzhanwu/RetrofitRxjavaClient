@@ -9,6 +9,9 @@ import com.jzw.dev.http.callback.OnRequestListener;
 import com.jzw.dev.http.callback.ProgressObserver;
 import com.jzw.dev.http.callback.SimpleObserver;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +19,9 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,18 +31,41 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Map<String, String> map = new HashMap<>();
-        map.put("Authorization", "");
-        map.put("user-agent", "android");
+         map.put("Content-Type", "application/json;charset=UTF-8");
 
         HttpConfig.init()
-                .setBaseUrl("http://192.168.0.116:8886/")
+                .setBaseUrl("http://...")
                 .setTimeOut(10)
                 .setHeadMap(map)
                 .create();
 
-
-        requestTest();
+        // requestTest();
         //uploadFile();
+
+        //带进度条
+//
+//        JSONObject json=new JSONObject();
+//        try {
+//            json.put("start","1");
+//            json.put("size","20");
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//
+//        RequestBody body=RequestBody.create(MediaType.parse("application/json"),json.toString());
+//        Call<ResultBase<PoliceInfo>> observable = HttpManager.get().getApiService(ApiService.class).getPoliceList(body);
+//
+//        HttpManager.get().request(observable, new OnRequestListener<ResultBase<PoliceInfo>>() {
+//            @Override
+//            public void onSuccess(ResultBase<PoliceInfo> s) {
+//                System.out.println("成功》" + s);
+//            }
+//
+//            @Override
+//            public void onFaild(int code, String msg) {
+//                System.out.println("失败》" + code + ">>" + msg);
+//            }
+//        });
     }
 
     /**

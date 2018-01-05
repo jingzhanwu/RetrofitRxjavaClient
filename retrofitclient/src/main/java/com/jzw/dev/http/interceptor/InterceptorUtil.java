@@ -18,6 +18,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 public class InterceptorUtil {
     private static String TAG = "jzw-okhttp";
+
     /**
      * 返回一个管理请求头信息的拦截器
      * 这个拦截器对请求头信息进行统一的配置，无需在请求时再添加，
@@ -30,12 +31,15 @@ public class InterceptorUtil {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request.Builder builder = chain.request().newBuilder();
+
                 builder.addHeader("Content-Type", "application/json; charset=UTF-8");
                 builder.addHeader("Connection", "keep-alive"); //连接保活
                 builder.addHeader("Accept", "*/*");
                 builder.header("Cache-Control", String.format("public, max-age=%d", 60)); //緩存策略
+
                 if (headMap != null && headMap.size() > 0) {
                     for (Map.Entry<String, String> map : headMap.entrySet()) {
+                        builder.removeHeader(map.getKey());
                         builder.addHeader(map.getKey(), map.getValue());
                     }
                 }

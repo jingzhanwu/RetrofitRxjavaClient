@@ -3,22 +3,17 @@
 
  如何引入：
  
-  1.MavenCenter方式引入，在project下的build.gradle配置如下
-  
-    allprojects {
-      repositories {
-        ...
-        maven {
-            url 'https://dl.bintray.com/jingzhanwu/jzw/'
+   allprojects {
+        repositories {
+            ...
+            maven {
+                url 'https://dl.bintray.com/jingzhanwu/jzw/'
+            }
         }
-      }
     }
 
- compile 'com.jzw.net:retrofitclient:1.1.1' 引入即可。
+ compile 'com.jzw.net:retrofitclient:1.1.2' 引入即可。
  
- 2.jcenter方式
- 
- compile 'com.jzw.net:retrofitclient:1.1.1' 直接引入即可。
 
  代码中如何使用：
 
