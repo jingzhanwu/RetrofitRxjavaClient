@@ -23,6 +23,11 @@ public class HttpConfig {
     private static int mTimeOut = 60;
     private static Map<String, String> mHeadMap = null;
 
+    /**
+     * 设置请求头的baseurl的key值
+     */
+    public final static String BASE_URL_KEY = "baseurl_key_name";
+
     private HttpConfig() {
     }
 

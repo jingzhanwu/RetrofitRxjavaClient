@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Map<String, String> map = new HashMap<>();
-         map.put("Content-Type", "application/json;charset=UTF-8");
+        map.put("Content-Type", "application/json;charset=UTF-8");
 
         HttpConfig.init()
                 .setBaseUrl("http://...")
@@ -43,29 +43,6 @@ public class MainActivity extends AppCompatActivity {
         //uploadFile();
 
         //带进度条
-//
-//        JSONObject json=new JSONObject();
-//        try {
-//            json.put("start","1");
-//            json.put("size","20");
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//
-//        RequestBody body=RequestBody.create(MediaType.parse("application/json"),json.toString());
-//        Call<ResultBase<PoliceInfo>> observable = HttpManager.get().getApiService(ApiService.class).getPoliceList(body);
-//
-//        HttpManager.get().request(observable, new OnRequestListener<ResultBase<PoliceInfo>>() {
-//            @Override
-//            public void onSuccess(ResultBase<PoliceInfo> s) {
-//                System.out.println("成功》" + s);
-//            }
-//
-//            @Override
-//            public void onFaild(int code, String msg) {
-//                System.out.println("失败》" + code + ">>" + msg);
-//            }
-//        });
     }
 
     /**

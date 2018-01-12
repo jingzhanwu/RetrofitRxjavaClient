@@ -111,6 +111,8 @@ public class HttpClient {
         }
         //添加一个拦截器，对请求都统一处理，这样做的好处是不用每次在ApiService的请求中配置
         builder.addInterceptor(InterceptorUtil.getHeadInterceptor(headMap));
+        //添加动态修改baseUrl的拦截器
+        builder.addInterceptor(InterceptorUtil.setBaseUrlInterceptor());
         //添加一个日志拦截器
         builder.addInterceptor(InterceptorUtil.getLogInterceptor());
         return builder.build();

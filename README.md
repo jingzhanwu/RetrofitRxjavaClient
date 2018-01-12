@@ -1,6 +1,6 @@
 # RetrofitRxjavaClient
 这是一个使用Retrofit2 + Rxjava2 + Rxandroid + okhttp3封装的一个简易型的网络请求库，第一次在项目上使用这些新技术，写的不好，还希望大家多提宝贵意见。
-
+支持动态配置baseUrl。在接口中使用@Headers({HttpConfig.BASE_URL_KEY+":http://..."})
  如何引入：
  
    allprojects {
@@ -12,7 +12,7 @@
         }
     }
 
- compile 'com.jzw.net:retrofitclient:1.1.2' 引入即可。
+ compile 'com.jzw.net:retrofitclient:1.1.3' 引入即可。
  
 
  代码中如何使用：
