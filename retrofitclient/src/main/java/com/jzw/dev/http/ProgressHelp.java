@@ -34,7 +34,7 @@ public class ProgressHelp {
                 dismissDialog();
             }
         });
-        mProgressDialog.setMessage("请稍后...");
+        mProgressDialog.setMessage("请稍候...");
         mProgressDialog.show();
     }
 
