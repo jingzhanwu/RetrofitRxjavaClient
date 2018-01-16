@@ -5,12 +5,11 @@ import android.os.Bundle;
 
 import com.jzw.dev.http.HttpConfig;
 import com.jzw.dev.http.HttpManager;
+import com.jzw.dev.http.ProgressHelp;
 import com.jzw.dev.http.callback.OnRequestListener;
 import com.jzw.dev.http.callback.ProgressObserver;
 import com.jzw.dev.http.callback.SimpleObserver;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,9 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,13 +33,10 @@ public class MainActivity extends AppCompatActivity {
         HttpConfig.init()
                 .setBaseUrl("http://...")
                 .setTimeOut(10)
-                .setHeadMap(map)
                 .create();
 
         // requestTest();
         //uploadFile();
-
-        //带进度条
     }
 
     /**

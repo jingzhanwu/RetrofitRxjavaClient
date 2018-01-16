@@ -16,14 +16,14 @@ public class ApiException extends Exception {
     public ApiException(Throwable throwable, int code) {
         super(throwable);
         this.code = code;
-        if (code >= 1000) {
+        if (code <= 1000) {
             handleMsg();
         }
     }
 
     public ApiException(int code) {
         this.code = code;
-        if (code >= 1000) {
+        if (code <= 1000) {
             handleMsg();
         }
     }
@@ -77,7 +77,7 @@ public class ApiException extends Exception {
                 break;
         }
         if (TextUtils.isEmpty(msg)) {
-            setMsg("服务器未知错误");
+            setMsg("服务器错误");
         }
     }
 }

@@ -32,10 +32,10 @@ public class ExceptionEngine {
             HttpException httpExc = (HttpException) e;
             ex = new ApiException(e, httpExc.code());
             return ex;
-        } else if (e instanceof ServerException) {    //服务器返回的错误
+        } else if (e instanceof ServerException) {
+            //服务器返回的错误
             ServerException serverExc = (ServerException) e;
             ex = new ApiException(serverExc, serverExc.getCode());
-            //ex.setMsg(serverExc.getMsg());
             return ex;
         } else if (e instanceof JsonParseException
                 || e instanceof JSONException

@@ -5,4 +5,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="@color/colorPrimary"
+        android:gravity="center"
+        android:onClick="testMVP"
+        android:padding="8dp"
+        android:text="测试MVP"
+        android:textColor="@color/colorAccent" />
 </LinearLayout>

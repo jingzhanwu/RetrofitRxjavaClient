@@ -15,7 +15,7 @@
         <!--是否是透明-->
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">@android:color/primary_text_light</item>
         <!--设置progressbar的颜色-->
         <item name="colorAccent">#258fe7</item>
     </style>

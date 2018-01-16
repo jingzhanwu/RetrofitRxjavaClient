@@ -12,7 +12,7 @@
         }
     }
 
- compile 'com.jzw.net:retrofitclient:1.1.3' 引入即可。
+ compile 'com.jzw.net:retrofitclient:1.1.4' 引入即可。
  
 
  代码中如何使用：
