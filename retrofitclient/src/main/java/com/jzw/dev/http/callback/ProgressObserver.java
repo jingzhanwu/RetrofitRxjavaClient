@@ -1,5 +1,6 @@
 package com.jzw.dev.http.callback;
 
+import android.app.Activity;
 import android.content.Context;
 
 import com.jzw.dev.http.ProgressHelp;
@@ -29,19 +30,31 @@ public abstract class ProgressObserver<T> extends SimpleObserver<T> {
     @Override
     public void onNext(@NonNull T t) {
         dismissDialog();
-        super.onNext(t);
+        if (!isContextFinished()) {
+            super.onNext(t);
+        } else {
+            releaseDispose();
+        }
     }
 
     @Override
     public void onComplete() {
         dismissDialog();
-        super.onComplete();
+        if (!isContextFinished()) {
+            super.onComplete();
+        } else {
+            releaseDispose();
+        }
     }
 
     @Override
     public void onError(@NonNull Throwable e) {
         dismissDialog();
-        super.onError(e);
+        if (!isContextFinished()) {
+            super.onError(e);
+        } else {
+            releaseDispose();
+        }
     }
 
     private void showDialog() {
@@ -53,6 +66,25 @@ public abstract class ProgressObserver<T> extends SimpleObserver<T> {
     private void dismissDialog() {
         if (mDialog != null) {
             mDialog.dismissDialog();
+            mDialog = null;
         }
+    }
+
+    /**
+     * 判断所依赖的context对象是否还存在
+     *
+     * @return
+     */
+    public boolean isContextFinished() {
+        if (mDialog == null) {
+            return false;
+        }
+        Context context = mDialog.mContext.get();
+        if (context != null) {
+            if (context instanceof Activity) {
+                return ((Activity) context).isFinishing();
+            }
+        }
+        return true;
     }
 }

@@ -47,7 +47,7 @@ public abstract class SimpleObserver<T> implements Observer<T> {
     /**
      * 取消本次订阅，
      */
-    private void releaseDispose() {
+    public void releaseDispose() {
         if (disposable != null) {
             disposable.dispose();
             disposable = null;

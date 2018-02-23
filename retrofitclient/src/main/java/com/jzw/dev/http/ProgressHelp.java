@@ -15,8 +15,7 @@ import java.lang.ref.WeakReference;
  **/
 public class ProgressHelp {
     private ProgressDialog mProgressDialog;
-    private WeakReference<Context> mContext;
-
+    public WeakReference<Context> mContext;
 
     public ProgressHelp(Context context) {
         mContext = new WeakReference<>(context);

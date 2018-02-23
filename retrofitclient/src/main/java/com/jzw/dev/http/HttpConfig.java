@@ -36,7 +36,7 @@ public class HttpConfig {
      *
      * @return
      */
-    public static HttpConfig init() {
+    public static HttpConfig get() {
         if (mInstance == null) {
             mInstance = BuildConfig.instance;
         }
@@ -57,7 +57,7 @@ public class HttpConfig {
      *
      * @return
      */
-    public static HttpConfig create() {
+    public HttpConfig create() {
         if (mHttpClient == null) {
             buildHttpClient();
         }
@@ -70,7 +70,7 @@ public class HttpConfig {
     /**
      * 构建一个HttpManger对象
      */
-    private static void buildHttpManager() {
+    private void buildHttpManager() {
         mHttpManager = HttpManager.get();
         mHttpManager.init();
     }
@@ -79,7 +79,7 @@ public class HttpConfig {
      * 构建一个HttClient的对象，必须在设置了baseUrl之后才可调用，
      * 负责会有异常抛出
      */
-    private static void buildHttpClient() {
+    private void buildHttpClient() {
         if (!isInitConfig()) {
             new Resources.NotFoundException("not found baseUrl or not init");
             return;
@@ -90,7 +90,7 @@ public class HttpConfig {
         mHttpClient.setHeadMap(mHeadMap);
     }
 
-    public static HttpClient getHttpClient() {
+    public HttpClient getHttpClient() {
         return mHttpClient;
     }
 
@@ -102,7 +102,7 @@ public class HttpConfig {
      * @param url
      * @return
      */
-    public static HttpConfig setBaseUrl(String url) {
+    public HttpConfig setBaseUrl(String url) {
         mBaseUrl = url;
         if (mHttpManager != null) {
             buildHttpManager();
@@ -116,7 +116,7 @@ public class HttpConfig {
      * @param filePath
      * @return
      */
-    public static HttpConfig setCacheFile(String filePath) {
+    public HttpConfig setCacheFile(String filePath) {
         mCacheFile = filePath;
         if (mHttpClient != null) {
             reset();
@@ -130,7 +130,7 @@ public class HttpConfig {
      * @param time
      * @return
      */
-    public static HttpConfig setTimeOut(int time) {
+    public HttpConfig setTimeOut(int time) {
         mTimeOut = time;
         if (mHttpClient != null) {
             reset();
@@ -145,7 +145,7 @@ public class HttpConfig {
      * @param head
      * @return
      */
-    public static HttpConfig setHeadMap(Map<String, String> head) {
+    public HttpConfig setHeadMap(Map<String, String> head) {
         mHeadMap = head;
         if (mHttpClient != null) {
             reset();
@@ -159,24 +159,24 @@ public class HttpConfig {
      * 比如（baseUrl，timeOut，headMap，cacheFile等）的值，
      * 这时才调用这个方法重新构建请求。
      */
-    private static void reset() {
+    private void reset() {
         buildHttpClient();
         buildHttpManager();
     }
 
-    public static String getBaseUrl() {
+    public String getBaseUrl() {
         return mBaseUrl;
     }
 
-    public static String getCacheFile() {
+    public String getCacheFile() {
         return mCacheFile;
     }
 
-    public static Map<String, String> getHeadMap() {
+    public Map<String, String> getHeadMap() {
         return mHeadMap;
     }
 
-    public static int getTimeOut() {
+    public int getTimeOut() {
         return mTimeOut;
     }
 
@@ -187,7 +187,7 @@ public class HttpConfig {
      *
      * @return
      */
-    private static boolean isInitConfig() {
+    private boolean isInitConfig() {
         if (mInstance == null) {
             return false;
         } else if (TextUtils.isEmpty(mBaseUrl)) {

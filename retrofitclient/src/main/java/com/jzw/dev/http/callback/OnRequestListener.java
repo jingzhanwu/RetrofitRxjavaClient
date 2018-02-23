@@ -1,6 +1,7 @@
 package com.jzw.dev.http.callback;
 
 
+import android.app.Activity;
 import android.content.Context;
 
 import com.jzw.dev.http.ProgressHelp;
@@ -13,7 +14,6 @@ import com.jzw.dev.http.ProgressHelp;
  **/
 public abstract class OnRequestListener<T> {
     private ProgressHelp mDialog;
-
     /**
      * 一般情况下使用的构造函数，
      */
@@ -25,10 +25,10 @@ public abstract class OnRequestListener<T> {
      * 使用这个构造函数，传递一个context对象，就可以自动显示
      * 一个dialog，而且是自定管理显示和隐藏。
      *
-     * @param showDialog
+     * @param context
      */
-    public OnRequestListener(Context showDialog) {
-        mDialog = new ProgressHelp(showDialog);
+    public OnRequestListener(Context context) {
+        mDialog = new ProgressHelp(context);
         onStart();
     }
 
@@ -48,6 +48,7 @@ public abstract class OnRequestListener<T> {
     public void onComplete() {
         if (mDialog != null) {
             mDialog.dismissDialog();
+            mDialog = null;
         }
     }
 
@@ -64,4 +65,22 @@ public abstract class OnRequestListener<T> {
      * @param msg
      */
     public abstract void onFaild(int code, String msg);
+
+    /**
+     * 判断所依赖的context对象是否还存在
+     *
+     * @return
+     */
+    public boolean isContextFinished() {
+        if (mDialog == null) {
+            return false;
+        }
+        Context context = mDialog.mContext.get();
+        if (context != null) {
+            if (context instanceof Activity) {
+                return ((Activity) context).isFinishing();
+            }
+        }
+        return true;
+    }
 }
