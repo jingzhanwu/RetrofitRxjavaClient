@@ -74,7 +74,7 @@ public class InterceptorUtil {
                     if (!TextUtils.isEmpty(urlValue)) {
                         newBaseUrl = HttpUrl.parse(urlValue);
                     } else {
-                        newBaseUrl = HttpUrl.parse(HttpConfig.getBaseUrl());
+                        newBaseUrl = HttpUrl.parse(HttpConfig.get().getBaseUrl());
                     }
                     //从request中获取原有的HttpUrl实例oldHttpUrl
                     HttpUrl oldHttpUrl = request.url();

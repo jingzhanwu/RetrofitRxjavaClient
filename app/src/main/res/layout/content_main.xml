@@ -11,8 +11,8 @@
         android:layout_margin="20dp"
         android:background="@color/colorPrimary"
         android:gravity="center"
-        android:onClick="testMVP"
+        android:onClick="testHttp"
         android:padding="8dp"
-        android:text="测试MVP"
+        android:text="测试Retrofit2"
         android:textColor="@color/colorAccent" />
 </LinearLayout>

@@ -44,7 +44,7 @@ import retrofit2.http.Multipart;
 public class HttpManager {
     private static Retrofit retrofit;
     private static HttpManager mInstance = null;
-    private HttpClient okhttpManager = null;
+    private static HttpClient okhttpManager = null;
 
     private HttpManager() {
     }
