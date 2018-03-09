@@ -6,7 +6,6 @@ import android.content.Context;
 import com.jzw.dev.http.ProgressHelp;
 
 import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
 
 /**
  * 带progressBar的Observer
@@ -22,29 +21,19 @@ public abstract class ProgressObserver<T> extends SimpleObserver<T> {
     }
 
     @Override
-    public void onSubscribe(@NonNull Disposable d) {
-        super.onSubscribe(d);
-    }
-
-
-    @Override
     public void onNext(@NonNull T t) {
         dismissDialog();
         if (!isContextFinished()) {
             super.onNext(t);
         } else {
-            releaseDispose();
+            cancel();
         }
     }
 
     @Override
     public void onComplete() {
+        super.onComplete();
         dismissDialog();
-        if (!isContextFinished()) {
-            super.onComplete();
-        } else {
-            releaseDispose();
-        }
     }
 
     @Override
@@ -53,7 +42,7 @@ public abstract class ProgressObserver<T> extends SimpleObserver<T> {
         if (!isContextFinished()) {
             super.onError(e);
         } else {
-            releaseDispose();
+            cancel();
         }
     }
 

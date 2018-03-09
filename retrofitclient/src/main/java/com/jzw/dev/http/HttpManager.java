@@ -1,7 +1,9 @@
 package com.jzw.dev.http;
 
 
+import com.jzw.dev.http.callback.FileUploadObserver;
 import com.jzw.dev.http.client.HttpClient;
+import com.jzw.dev.http.client.UploadFileRequestBody;
 import com.jzw.dev.http.exception.ApiException;
 import com.jzw.dev.http.exception.ExceptionEngine;
 import com.jzw.dev.http.callback.OnRequestListener;
@@ -102,6 +104,26 @@ public class HttpManager {
 
 
     /**
+     * 文件上传专用方法，可以监听上传进度
+     * @param observable
+     * @param fileUploadObserver
+     * @param <T>
+     */
+    public <T> void uploadFile(Observable<T> observable, FileUploadObserver<T> fileUploadObserver) {
+        observable.subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        //可以处理网络状态
+
+                    }
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(fileUploadObserver);
+    }
+
+    /**
      * 网络请求对外暴露的方法，Rxjava请求都走这个方法
      *
      * @param observable
@@ -123,7 +145,7 @@ public class HttpManager {
     }
 
 
-    public <T> void subscriber(final Observable<T> observable, final OnRequestListener<T> listener) {
+    public <T> Disposable subscriber(final Observable<T> observable, final OnRequestListener<T> listener) {
         final Disposable disposable = observable.subscribeOn(Schedulers.io())
                 .unsubscribeOn(Schedulers.io())
                 .doOnSubscribe(new Consumer<Disposable>() {
@@ -160,6 +182,7 @@ public class HttpManager {
                         });
 
         disposable.dispose();
+        return disposable;
     }
 
     /**

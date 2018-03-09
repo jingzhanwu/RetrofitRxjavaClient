@@ -1,6 +1,7 @@
 package com.jzw.dev.http.client;
 
 
+import android.support.v4.BuildConfig;
 import android.text.TextUtils;
 
 import com.jzw.dev.http.interceptor.InterceptorUtil;
@@ -114,7 +115,9 @@ public class HttpClient {
         //添加动态修改baseUrl的拦截器
         builder.addInterceptor(InterceptorUtil.setBaseUrlInterceptor());
         //添加一个日志拦截器
-        builder.addInterceptor(InterceptorUtil.getLogInterceptor());
+        if (BuildConfig.DEBUG) {
+            builder.addInterceptor(InterceptorUtil.getLogInterceptor());
+        }
         return builder.build();
     }
 }

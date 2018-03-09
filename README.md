@@ -12,7 +12,7 @@
         }
     }
 
- compile 'com.jzw.net:retrofitclient:1.1.7' 引入即可。
+ compile 'com.jzw.net:retrofitclient:1.1.8' 引入即可。
  
 
  代码中如何使用：
@@ -116,6 +116,31 @@
 
                 }
             });
+            
+    (4) 带进度监听的文件上传，支持多文件 + 文本混合上传
+        FileUploadObserver<ResultObj> fileUploadObserver = new FileUploadObserver<ResultObj>() {
+                    @Override
+                    public void onUploadSuccess(ResultObj result) {
+                        System.out.println("成功》》" + result.getCode());
+                    }
+        
+                    @Override
+                    public void onUploadFaild(Throwable e) {
+                        System.out.println("失败》》" + e.getMessage());
+                    }
+        
+                    @Override
+                    public void onProgress(int progress) {
+        
+                        System.out.println("进度》》" + progress);
+                    }
+                };
+        
+                RequestBody body = new ApiParams().buildMultipartBodys(files, "uploadFile");
+                UploadFileRequestBody fileBody = new UploadFileRequestBody(body, fileUploadObserver);
+                Observable<ResultObj> observable = HttpManager.get().getApiService(ApiFileService.class).upload(fileBody);
+        
+                HttpManager.get().subscriber(observable, fileUploadObserver);
             
   博客地址：http://my.csdn.net/qq_19979101
   Mvp开发框架

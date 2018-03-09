@@ -3,9 +3,8 @@ package com.jzw.dev.http.callback;
 import com.jzw.dev.http.exception.ApiException;
 import com.jzw.dev.http.exception.ExceptionEngine;
 
-import io.reactivex.Observer;
 import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DefaultObserver;
 
 /**
  * 默认的自定义观察者 回调接口
@@ -13,14 +12,7 @@ import io.reactivex.disposables.Disposable;
  * Created by 景占午 on 2017/9/15 0015.
  */
 
-public abstract class SimpleObserver<T> implements Observer<T> {
-
-    private Disposable disposable;
-
-    @Override
-    public void onSubscribe(@NonNull Disposable d) {
-        disposable = d;
-    }
+public abstract class SimpleObserver<T> extends DefaultObserver<T> {
 
     @Override
     public void onNext(@NonNull T t) {
@@ -36,22 +28,10 @@ public abstract class SimpleObserver<T> implements Observer<T> {
             e1.printStackTrace();
             onFailure(2000, "未知异常");
         }
-        releaseDispose();
     }
 
     @Override
     public void onComplete() {
-        releaseDispose();
-    }
-
-    /**
-     * 取消本次订阅，
-     */
-    public void releaseDispose() {
-        if (disposable != null) {
-            disposable.dispose();
-            disposable = null;
-        }
     }
 
     /**

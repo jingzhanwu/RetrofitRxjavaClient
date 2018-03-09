@@ -106,6 +106,6 @@ public class InterceptorUtil {
             public void log(String message) {
                 Log.w(TAG, "log:" + message);
             }
-        }).setLevel(HttpLoggingInterceptor.Level.BODY);//设置打印级别
+        }).setLevel(HttpLoggingInterceptor.Level.BASIC);//设置打印级别
     }
 }
