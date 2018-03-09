@@ -1,5 +1,8 @@
 package com.jzw.dev.http.callback;
 
+import com.jzw.dev.http.exception.ApiException;
+import com.jzw.dev.http.exception.ExceptionEngine;
+
 import io.reactivex.observers.DefaultObserver;
 
 /**
@@ -18,7 +21,14 @@ public abstract class FileUploadObserver<T> extends DefaultObserver<T> {
 
     @Override
     public void onError(Throwable e) {
-        onUploadFaild(e);
+        try {
+            ApiException exception = ExceptionEngine.handleException(e);
+            onUploadFaild(exception.getCode(), exception.getMsg());
+        } catch (Exception e1) {
+            e1.printStackTrace();
+            onUploadFaild(2000, "未知异常");
+        }
+
     }
 
     @Override
@@ -47,9 +57,9 @@ public abstract class FileUploadObserver<T> extends DefaultObserver<T> {
     /**
      * 上传失败回调
      *
-     * @param e
+     * @param
      */
-    public abstract void onUploadFaild(Throwable e);
+    public abstract void onUploadFaild(int errorCode, String msg);
 
     /**
      * 上传进度回调
