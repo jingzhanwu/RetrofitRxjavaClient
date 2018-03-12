@@ -12,13 +12,13 @@
         }
     }
 
- compile 'com.jzw.net:retrofitclient:1.2.0' 引入即可。
+ compile 'com.jzw.net:retrofitclient:2.0.0' 引入即可。
  
 
  代码中如何使用：
 
  1.全局只需要初始化配置一次
-     HttpConfig.init()
+     HttpConfig.get()
        .setBaseUrl("http://...")
        .create();
 
