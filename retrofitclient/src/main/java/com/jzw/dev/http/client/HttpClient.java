@@ -29,6 +29,7 @@ public class HttpClient {
     private int TIME_OUT = 60;
     private String cacheDir = null;
     private boolean cookie = false;
+    private boolean enableLog = true;
     private Map<String, String> headMap = null;
 
     /**
@@ -40,6 +41,15 @@ public class HttpClient {
      */
     public void setHeadMap(Map<String, String> head) {
         headMap = head;
+    }
+
+    /**
+     * 是否开启日志
+     *
+     * @param enable
+     */
+    public void enableLog(boolean enable) {
+        enableLog = enable;
     }
 
     /**
@@ -71,6 +81,10 @@ public class HttpClient {
 
     public boolean isSupportCookie() {
         return cookie;
+    }
+
+    public boolean isEnableLog() {
+        return enableLog;
     }
 
     /**
@@ -115,7 +129,7 @@ public class HttpClient {
         //添加动态修改baseUrl的拦截器
         builder.addInterceptor(InterceptorUtil.setBaseUrlInterceptor());
         //添加一个日志拦截器
-        if (BuildConfig.DEBUG) {
+        if (isEnableLog()) {
             builder.addInterceptor(InterceptorUtil.getLogInterceptor());
         }
         return builder.build();

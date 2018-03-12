@@ -16,12 +16,13 @@ import java.util.Map;
  **/
 public class HttpConfig {
     private static HttpConfig mInstance = null;
-    private static HttpClient mHttpClient = null;
-    private static HttpManager mHttpManager = null;
-    private static String mCacheFile = null;
-    private static String mBaseUrl = "";
-    private static int mTimeOut = 60;
-    private static Map<String, String> mHeadMap = null;
+    private HttpClient mHttpClient = null;
+    private HttpManager mHttpManager = null;
+    private String mCacheFile = null;
+    private String mBaseUrl = "";
+    private int mTimeOut = 60;
+    private boolean mEnableLog = true;
+    private Map<String, String> mHeadMap = null;
 
     /**
      * 设置请求头的baseurl的key值
@@ -88,6 +89,7 @@ public class HttpConfig {
         mHttpClient.setTimeOut(mTimeOut);
         mHttpClient.setCacheDir(mCacheFile);
         mHttpClient.setHeadMap(mHeadMap);
+        mHttpClient.enableLog(mEnableLog);
     }
 
     public HttpClient getHttpClient() {
@@ -106,6 +108,20 @@ public class HttpConfig {
         mBaseUrl = url;
         if (mHttpManager != null) {
             buildHttpManager();
+        }
+        return mInstance;
+    }
+
+    /**
+     * 是否开启日志
+     *
+     * @param enable
+     * @return
+     */
+    public HttpConfig enableLog(boolean enable) {
+        mEnableLog = enable;
+        if (mHttpClient != null) {
+            reset();
         }
         return mInstance;
     }
