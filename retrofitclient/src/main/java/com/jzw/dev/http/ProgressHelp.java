@@ -17,24 +17,46 @@ public class ProgressHelp {
     private ProgressDialog mProgressDialog;
     public WeakReference<Context> mContext;
 
-    public ProgressHelp(Context context) {
-        mContext = new WeakReference<>(context);
+    private static ProgressHelp mInstance;
+
+    private ProgressHelp() {
     }
 
-    public void showDialog() {
-        mProgressDialog = new ProgressDialog(mContext.get(), R.style.jzw_simple_progress);
-        mProgressDialog.setCanceledOnTouchOutside(false);
-        mProgressDialog.setCancelable(true);
-        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                Log.d("jzw-okhttp", "ProgressDialog.onCancel");
-                dismissDialog();
+    public static ProgressHelp get() {
+        if (mInstance == null) {
+            synchronized (ProgressHelp.class) {
+                if (mInstance == null) {
+                    mInstance = new ProgressHelp();
+                }
             }
-        });
-        mProgressDialog.setMessage("请稍候...");
-        mProgressDialog.show();
+        }
+        return mInstance;
+    }
+
+    public void showDialog(Context context) {
+        mContext = new WeakReference<>(context);
+        if (!isShowing()) {
+            mProgressDialog = new ProgressDialog(mContext.get(), R.style.jzw_simple_progress);
+            mProgressDialog.setCanceledOnTouchOutside(false);
+            mProgressDialog.setCancelable(true);
+            mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    Log.d("jzw-okhttp", "ProgressDialog.onCancel");
+                    dismissDialog();
+                }
+            });
+            mProgressDialog.setMessage("请稍候...");
+            mProgressDialog.show();
+        }
+    }
+
+    public boolean isShowing() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            return true;
+        }
+        return false;
     }
 
     public void dismissDialog() {

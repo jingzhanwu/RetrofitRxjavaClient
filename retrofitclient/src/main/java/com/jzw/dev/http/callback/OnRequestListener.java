@@ -13,7 +13,6 @@ import com.jzw.dev.http.ProgressHelp;
  * @describe 回掉接口
  **/
 public abstract class OnRequestListener<T> {
-    private ProgressHelp mDialog;
     /**
      * 一般情况下使用的构造函数，
      */
@@ -28,28 +27,15 @@ public abstract class OnRequestListener<T> {
      * @param context
      */
     public OnRequestListener(Context context) {
-        mDialog = new ProgressHelp(context);
-        onStart();
+        ProgressHelp.get().showDialog(context);
     }
 
-    /**
-     * 请求之前做一些处理，这里就直接显示一个dialog了，
-     * 调用者也可以自定义个接口或者抽象类来集成这类，实现自己的处理逻辑
-     */
-    public void onStart() {
-        if (mDialog != null) {
-            mDialog.showDialog();
-        }
-    }
 
     /**
      * 请求完成的时候调用，做一些善后处理
      */
     public void onComplete() {
-        if (mDialog != null) {
-            mDialog.dismissDialog();
-            mDialog = null;
-        }
+        ProgressHelp.get().dismissDialog();
     }
 
     /**
@@ -72,10 +58,10 @@ public abstract class OnRequestListener<T> {
      * @return
      */
     public boolean isContextFinished() {
-        if (mDialog == null) {
+        if (ProgressHelp.get().isShowing()) {
             return false;
         }
-        Context context = mDialog.mContext.get();
+        Context context = ProgressHelp.get().mContext.get();
         if (context != null) {
             if (context instanceof Activity) {
                 return ((Activity) context).isFinishing();
