@@ -17,6 +17,7 @@ public abstract class SimpleObserver<T> extends DefaultObserver<T> {
     @Override
     public void onNext(@NonNull T t) {
         onSuccess(t);
+        cancel();
     }
 
     @Override
@@ -28,10 +29,12 @@ public abstract class SimpleObserver<T> extends DefaultObserver<T> {
             e1.printStackTrace();
             onFailure(2000, "未知异常");
         }
+        cancel();
     }
 
     @Override
     public void onComplete() {
+        cancel();
     }
 
     /**

@@ -21,44 +21,18 @@ public abstract class ProgressObserver<T> extends SimpleObserver<T> {
     @Override
     public void onNext(@NonNull T t) {
         ProgressHelp.get().dismissDialog();
-        if (!isContextFinished()) {
-            super.onNext(t);
-        } else {
-            cancel();
-        }
+        super.onNext(t);
     }
 
     @Override
     public void onComplete() {
-        super.onComplete();
         ProgressHelp.get().dismissDialog();
+        super.onComplete();
     }
 
     @Override
     public void onError(@NonNull Throwable e) {
         ProgressHelp.get().dismissDialog();
-        if (!isContextFinished()) {
-            super.onError(e);
-        } else {
-            cancel();
-        }
-    }
-
-    /**
-     * 判断所依赖的context对象是否还存在
-     *
-     * @return
-     */
-    public boolean isContextFinished() {
-        if (ProgressHelp.get().isShowing()) {
-            return false;
-        }
-        Context context = ProgressHelp.get().mContext.get();
-        if (context != null) {
-            if (context instanceof Activity) {
-                return ((Activity) context).isFinishing();
-            }
-        }
-        return true;
+        super.onError(e);
     }
 }

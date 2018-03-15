@@ -1,7 +1,6 @@
 package com.jzw.dev.http.callback;
 
 
-import android.app.Activity;
 import android.content.Context;
 
 import com.jzw.dev.http.ProgressHelp;
@@ -51,22 +50,4 @@ public abstract class OnRequestListener<T> {
      * @param msg
      */
     public abstract void onFaild(int code, String msg);
-
-    /**
-     * 判断所依赖的context对象是否还存在
-     *
-     * @return
-     */
-    public boolean isContextFinished() {
-        if (ProgressHelp.get().isShowing()) {
-            return false;
-        }
-        Context context = ProgressHelp.get().mContext.get();
-        if (context != null) {
-            if (context instanceof Activity) {
-                return ((Activity) context).isFinishing();
-            }
-        }
-        return true;
-    }
 }

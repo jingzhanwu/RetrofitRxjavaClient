@@ -105,6 +105,7 @@ public class HttpManager {
 
     /**
      * 文件上传专用方法，可以监听上传进度
+     *
      * @param observable
      * @param fileUploadObserver
      * @param <T>
@@ -160,19 +161,15 @@ public class HttpManager {
                                @Override
                                public void accept(T t) throws Exception {
                                    listener.onComplete();
-                                   if (!listener.isContextFinished()) {
-                                       listener.onSuccess(t);
-                                   }
+                                   listener.onSuccess(t);
                                }
                            },
                         new Consumer<Throwable>() {
                             @Override
                             public void accept(Throwable throwable) throws Exception {
                                 listener.onComplete();
-                                if (!listener.isContextFinished()) {
-                                    ApiException ex = ExceptionEngine.handleException(throwable);
-                                    listener.onFaild(ex.getCode(), ex.getMsg());
-                                }
+                                ApiException ex = ExceptionEngine.handleException(throwable);
+                                listener.onFaild(ex.getCode(), ex.getMsg());
                             }
                         }, new Action() {
                             @Override
@@ -197,34 +194,32 @@ public class HttpManager {
             @Override
             public void onResponse(Call<T> call, Response<T> response) {
                 listener.onComplete();
-                if (!listener.isContextFinished()) {
-                    if (response.code() == 200) {
-                        if (response.body() != null) {
-                            listener.onSuccess(response.body());
-                        } else {
-                            listener.onFaild(2000, "出错了");
-                        }
-                    } else {
-                        ApiException exception = new ApiException(response.code());
-                        listener.onFaild(exception.getCode(), exception.getMsg());
-                    }
-                }
                 call.cancel();
+                if (response.code() == 200) {
+                    if (response.body() != null) {
+                        listener.onSuccess(response.body());
+                    } else {
+                        listener.onFaild(2000, "出错了");
+                    }
+                } else {
+                    ApiException exception = new ApiException(response.code());
+                    listener.onFaild(exception.getCode(), exception.getMsg());
+                }
+
             }
 
             @Override
             public void onFailure(Call<T> call, Throwable t) {
                 listener.onComplete();
-                if (!listener.isContextFinished()) {
-                    try {
-                        ApiException exception = ExceptionEngine.handleException(t);
-                        listener.onFaild(exception.getCode(), exception.getMsg());
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                        listener.onFaild(2000, "未知异常");
-                    }
-                }
                 call.cancel();
+                try {
+                    ApiException exception = ExceptionEngine.handleException(t);
+                    listener.onFaild(exception.getCode(), exception.getMsg());
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                    listener.onFaild(2000, "未知异常");
+                }
+
             }
         });
     }
