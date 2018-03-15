@@ -13,16 +13,14 @@ import io.reactivex.annotations.NonNull;
  */
 
 public abstract class ProgressObserver<T> extends SimpleObserver<T> {
-    private ProgressHelp mDialog;
 
     public ProgressObserver(Context context) {
-        mDialog = new ProgressHelp(context);
-        showDialog();
+        ProgressHelp.get().showDialog(context);
     }
 
     @Override
     public void onNext(@NonNull T t) {
-        dismissDialog();
+        ProgressHelp.get().dismissDialog();
         if (!isContextFinished()) {
             super.onNext(t);
         } else {
@@ -33,29 +31,16 @@ public abstract class ProgressObserver<T> extends SimpleObserver<T> {
     @Override
     public void onComplete() {
         super.onComplete();
-        dismissDialog();
+        ProgressHelp.get().dismissDialog();
     }
 
     @Override
     public void onError(@NonNull Throwable e) {
-        dismissDialog();
+        ProgressHelp.get().dismissDialog();
         if (!isContextFinished()) {
             super.onError(e);
         } else {
             cancel();
-        }
-    }
-
-    private void showDialog() {
-        if (mDialog != null) {
-            mDialog.showDialog();
-        }
-    }
-
-    private void dismissDialog() {
-        if (mDialog != null) {
-            mDialog.dismissDialog();
-            mDialog = null;
         }
     }
 
@@ -65,10 +50,10 @@ public abstract class ProgressObserver<T> extends SimpleObserver<T> {
      * @return
      */
     public boolean isContextFinished() {
-        if (mDialog == null) {
+        if (ProgressHelp.get().isShowing()) {
             return false;
         }
-        Context context = mDialog.mContext.get();
+        Context context = ProgressHelp.get().mContext.get();
         if (context != null) {
             if (context instanceof Activity) {
                 return ((Activity) context).isFinishing();
