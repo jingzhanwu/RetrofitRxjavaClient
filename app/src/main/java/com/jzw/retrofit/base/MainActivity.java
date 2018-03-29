@@ -13,10 +13,7 @@ import com.jzw.dev.http.callback.ProgressObserver;
 import com.jzw.dev.http.callback.SimpleObserver;
 
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;

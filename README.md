@@ -1,24 +1,17 @@
 # RetrofitRxjavaClient
-这是一个使用Retrofit2 + Rxjava2 + Rxandroid + okhttp3封装的一个简易型的网络请求库，第一次在项目上使用这些新技术，写的不好，还希望大家多提宝贵意见。
-支持动态配置baseUrl。在接口中使用@Headers({HttpConfig.BASE_URL_KEY+":http://..."})
- 如何引入：
- 
-   allprojects {
-        repositories {
-            ...
-            maven {
-                url 'https://dl.bintray.com/jingzhanwu/jzw/'
-            }
-        }
-    }
 
- compile 'com.jzw.net:retrofitclient:2.0.2' 引入即可。
+这是一个使用Retrofit2 + Rxjava2 + okhttp3封装的一个简易型的网络请求库，
+第一次在项目上使用这些新技术，写的不好，还希望大家多提宝贵意见。
+
+  如何引入：
+  compile 'com.jzw:http-retrofit:2.0' 引入即可。
  
 
  代码中如何使用：
 
- 1.全局只需要初始化配置一次
-     HttpConfig.get()
+ 1.初始化配置
+ 
+       HttpConfig.get()
        .setBaseUrl("http://...")
        .create();
 
@@ -33,6 +26,9 @@
                 .setHeadMap(map)
                 .create();
 
+    支持动态配置baseUrl。
+    在接口中使用@Headers({HttpConfig.BASE_URL_KEY+":http://..."})
+    
  2.调用
 
     （1）配合rxjava方式
@@ -96,7 +92,7 @@
             files.add(new File(""));
             files.add(new File(""));
             //第一种，返回 一个MultipartBody.Part集合
-            List<MultipartBody.Part> part = HttpManager.get().buildMultPartList(params, files, "file");
+            List<MultipartBody.Part> part = new ApiParams().buildMultPartList(params, files, "file");
 
             HttpManager.get().getApiService(ApiService.class).uploadFile(part);
             //第二种，返回一个MultipartBody
@@ -143,8 +139,12 @@
                 HttpManager.get().subscriber(observable, fileUploadObserver);
             
   博客地址：http://my.csdn.net/qq_19979101
+  
   Mvp开发框架
   https://github.com/jingzhanwu/MvpBase
+  
   android工具库
   https://github.com/jingzhanwu/DevUtils
   
+  Android 多媒体库
+  https://github.com/jingzhanwu/MediaLibrary

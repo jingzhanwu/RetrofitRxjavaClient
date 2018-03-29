@@ -1,7 +1,6 @@
 package com.jzw.dev.http.client;
 
 
-import android.support.v4.BuildConfig;
 import android.text.TextUtils;
 
 import com.jzw.dev.http.interceptor.InterceptorUtil;
@@ -31,6 +30,8 @@ public class HttpClient {
     private boolean cookie = false;
     private boolean enableLog = true;
     private Map<String, String> headMap = null;
+
+    private OkHttpClient okHttpClient;
 
     /**
      * 设置一些头信息，默认可以不设置，
@@ -88,6 +89,15 @@ public class HttpClient {
     }
 
     /**
+     * 获得一个Okhttp的 客户端
+     *
+     * @return
+     */
+    public OkHttpClient getClient() {
+        return okHttpClient == null ? buildClient() : okHttpClient;
+    }
+
+    /**
      * 正式构建一个http的客户端，这里使用的是okhttp3作为http的一个请求客户端，
      *
      * @return
@@ -132,6 +142,7 @@ public class HttpClient {
         if (isEnableLog()) {
             builder.addInterceptor(InterceptorUtil.getLogInterceptor());
         }
-        return builder.build();
+        okHttpClient = builder.build();
+        return okHttpClient;
     }
 }
