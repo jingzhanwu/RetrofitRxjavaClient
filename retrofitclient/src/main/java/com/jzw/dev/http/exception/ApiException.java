@@ -16,16 +16,12 @@ public class ApiException extends Exception {
     public ApiException(Throwable throwable, int code) {
         super(throwable);
         this.code = code;
-        if (code <= 1000) {
-            handleMsg();
-        }
+        handleMsg();
     }
 
     public ApiException(int code) {
         this.code = code;
-        if (code <= 1000) {
-            handleMsg();
-        }
+        handleMsg();
     }
 
     public ApiException(int code, String msg) {
@@ -63,17 +59,39 @@ public class ApiException extends Exception {
             case 405:
                 setMsg("禁止访问");
                 break;
+            case 407:
+                setMsg("需要代理身份验证");
+                break;
             case 408:
                 setMsg("请求超时");
                 break;
+            case 414:
+                setMsg("请求地址太长");
+                break;
             case 500:
-                setMsg("服务器错误");
+                setMsg("服务器出错了");
                 break;
             case 501:
-                setMsg("服务器无法识别");
+                setMsg("不支持此请求");
+                break;
+            case 502:
+                setMsg("网关出错");
                 break;
             case 504:
                 setMsg("服务器超时");
+                break;
+
+            case 1000:
+                setMsg("服务器超时");
+                break;
+            case 1001:
+                setMsg("解析出错了");
+                break;
+            case 1002:
+                setMsg("请检查网络连接");
+                break;
+            case 1003:
+                setMsg("网络超时");
                 break;
         }
         if (TextUtils.isEmpty(msg)) {
