@@ -40,7 +40,7 @@ public class ExceptionEngine {
                 || e instanceof JSONException
                 || e instanceof ParseException || e instanceof MalformedJsonException) {  //解析数据错误
             ex = new ApiException(e, ANALYTIC_SERVER_DATA_ERROR);
-            ex.setMsg("解析出错了");
+            ex.setMsg("数据解析错误");
             return ex;
         } else if (e instanceof ConnectException) {//连接网络错误
             ex = new ApiException(e, CONNECT_ERROR);

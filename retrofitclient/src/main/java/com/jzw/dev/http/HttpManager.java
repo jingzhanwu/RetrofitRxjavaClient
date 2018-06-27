@@ -2,15 +2,14 @@ package com.jzw.dev.http;
 
 
 import com.jzw.dev.http.callback.FileUploadObserver;
+import com.jzw.dev.http.callback.OnHttpResponseCallback;
 import com.jzw.dev.http.client.HttpClient;
-import com.jzw.dev.http.client.UploadFileRequestBody;
 import com.jzw.dev.http.exception.ApiException;
 import com.jzw.dev.http.exception.ExceptionEngine;
 import com.jzw.dev.http.callback.OnRequestListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +22,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,7 +30,6 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
-import retrofit2.http.Multipart;
 
 /**
  * 初始化httpClient 装载ApiService并对外提供统一调用接口
@@ -44,9 +40,23 @@ import retrofit2.http.Multipart;
  */
 
 public class HttpManager {
-    private static Retrofit retrofit;
-    private static HttpManager mInstance = null;
-    private static HttpClient okhttpManager = null;
+    private static HttpManager mInstance;
+    private HttpClient httpClient;
+    private OkHttpClient okhttpClient;
+    private OkHttpClient okHttpTempClient;
+    private HttpConfig config;
+    private String mBaseUrl;
+    private Map<String, String> mHeadMap = null;
+
+    private List<OnHttpResponseCallback> responseCallbacks;
+
+    public HttpManager setOnHttpResponseCallback(OnHttpResponseCallback callback) {
+        if (responseCallbacks == null) {
+            responseCallbacks = new ArrayList<>();
+        }
+        this.responseCallbacks.add(callback);
+        return this;
+    }
 
     private HttpManager() {
     }
@@ -68,13 +78,60 @@ public class HttpManager {
     }
 
     /**
-     * 初始化一些操作对象，包括retrofit和httpClient
-     * 这个方法一般在应用的入口处值调用一次即可，不用多次调用
+     * http库初始化操作，请求开始之前，
+     * 一般放在application 中初始化
+     *
+     * @param httpConfig
      */
-    public void init() {
-        okhttpManager = HttpConfig.get().getHttpClient();
+    public HttpManager init(HttpConfig httpConfig) {
+        this.config = httpConfig;
+        this.mBaseUrl = config.getBaseUrl();
+        this.mHeadMap = config.getHeadMap();
+        this.httpClient = new HttpClient(config);
+        this.okhttpClient = httpClient.getClient();
+        return this;
+    }
+
+    /**
+     * 动态设置baseUrl，只对本次请求有效
+     *
+     * @param baseUrl
+     * @return
+     */
+    public HttpManager setBaseUrl(String baseUrl) {
+        this.mBaseUrl = baseUrl;
+        return this;
+    }
+
+    /**
+     * 设置全局头信息
+     *
+     * @param headMap
+     * @return
+     */
+    public HttpManager setHeaders(Map<String, String> headMap) {
+        config.setHeadMap(headMap);
+        httpClient = new HttpClient(config);
+        okhttpClient = httpClient.getClient();
+        okHttpTempClient = null;
+        return this;
+    }
+
+    public HttpManager setLocalHeaders(Map<String, String> tempHeaders) {
+        HttpConfig tempConfig = config;
+        tempConfig.setHeadMap(tempHeaders);
+        okHttpTempClient = new HttpClient(tempConfig).getClient();
+        return this;
+    }
+
+    /**
+     * 构建Retrofit对象
+     *
+     * @return
+     */
+    private Retrofit getRetrofit() {
         Retrofit.Builder rbuilder = new Retrofit.Builder()
-                .baseUrl(HttpConfig.get().getBaseUrl())
+                .baseUrl(mBaseUrl)
                 //如果请求返回的不是json 而是字符串，则使用下面的解析器
                 .addConverterFactory(ScalarsConverterFactory.create())
                 //如果请求返回额是json则使用下面的解析器，
@@ -82,13 +139,22 @@ public class HttpManager {
                 .addConverterFactory(GsonConverterFactory.create(buildGson()))
                 //添加Rxjava的支持，把Retrofit转成Rxjava可用的适配类
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .client(okhttpManager.buildClient());
+                .client(okHttpTempClient == null ? okhttpClient : okHttpTempClient);
 
-        retrofit = rbuilder.build();
+        Retrofit retrofit = rbuilder.build();
+        //将url回归，有可能本次请求有设置的临时baseUrl
+        mBaseUrl = config.getBaseUrl();
+        okHttpTempClient = null;
+        return retrofit;
     }
 
-    public Retrofit getRetrofit() {
-        return retrofit;
+    /**
+     * 获取HttpConfig对象
+     *
+     * @return
+     */
+    public HttpConfig getConfig() {
+        return config;
     }
 
     /**
@@ -170,6 +236,7 @@ public class HttpManager {
                                 listener.onComplete();
                                 ApiException ex = ExceptionEngine.handleException(throwable);
                                 listener.onFaild(ex.getCode(), ex.getMsg());
+                                dispatchResponse(ex.getCode(), ex, null);
                             }
                         }, new Action() {
                             @Override
@@ -180,6 +247,21 @@ public class HttpManager {
 
         disposable.dispose();
         return disposable;
+    }
+
+    /**
+     * http响应后，将相关结果回调到调用者
+     *
+     * @param code
+     * @param ex
+     * @param response
+     */
+    private void dispatchResponse(int code, ApiException ex, Response response) {
+        if (responseCallbacks != null) {
+            for (OnHttpResponseCallback callback : responseCallbacks) {
+                callback.onResponse(code, ex, response);
+            }
+        }
     }
 
     /**
@@ -195,17 +277,18 @@ public class HttpManager {
             public void onResponse(Call<T> call, Response<T> response) {
                 listener.onComplete();
                 call.cancel();
+                ApiException exception = new ApiException(response.code());
                 if (response.code() == 200) {
                     if (response.body() != null) {
                         listener.onSuccess(response.body());
                     } else {
-                        listener.onFaild(2000, "出错了");
+                        listener.onFaild(response.code(), exception.getMsg());
                     }
                 } else {
-                    ApiException exception = new ApiException(response.code());
                     listener.onFaild(exception.getCode(), exception.getMsg());
                 }
 
+                dispatchResponse(response.code(), exception, response);
             }
 
             @Override
@@ -215,11 +298,11 @@ public class HttpManager {
                 try {
                     ApiException exception = ExceptionEngine.handleException(t);
                     listener.onFaild(exception.getCode(), exception.getMsg());
+                    dispatchResponse(exception.getCode(), exception, null);
                 } catch (Exception e1) {
                     e1.printStackTrace();
                     listener.onFaild(2000, "未知异常");
                 }
-
             }
         });
     }

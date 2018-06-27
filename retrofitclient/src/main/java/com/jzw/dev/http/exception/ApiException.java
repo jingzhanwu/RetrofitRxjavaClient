@@ -45,8 +45,11 @@ public class ApiException extends Exception {
         this.msg = msg;
     }
 
-    public void handleMsg() {
+    private void handleMsg() {
         switch (code) {
+            case 200:
+                setMsg("请求成功");
+                break;
             case 400:
                 setMsg("错误请求");
                 break;
@@ -54,7 +57,7 @@ public class ApiException extends Exception {
                 setMsg("身份认证失败");
                 break;
             case 404:
-                setMsg("地址无效");
+                setMsg("请求失败");
                 break;
             case 405:
                 setMsg("禁止访问");
@@ -68,6 +71,9 @@ public class ApiException extends Exception {
             case 414:
                 setMsg("请求地址太长");
                 break;
+            case 415:
+                setMsg("不支持的请求资源");
+                break;
             case 500:
                 setMsg("服务器出错了");
                 break;
@@ -80,12 +86,11 @@ public class ApiException extends Exception {
             case 504:
                 setMsg("服务器超时");
                 break;
-
             case 1000:
                 setMsg("服务器超时");
                 break;
             case 1001:
-                setMsg("解析出错了");
+                setMsg("数据解析失败");
                 break;
             case 1002:
                 setMsg("请检查网络连接");
@@ -95,7 +100,7 @@ public class ApiException extends Exception {
                 break;
         }
         if (TextUtils.isEmpty(msg)) {
-            setMsg("服务器错误");
+            setMsg("未知错误");
         }
     }
 }

@@ -56,7 +56,7 @@ public class InterceptorUtil {
         };
     }
 
-    public static Interceptor setBaseUrlInterceptor() {
+    public static Interceptor setBaseUrlInterceptor(final String baseUrl) {
         return new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
@@ -64,17 +64,17 @@ public class InterceptorUtil {
                 //获取request的创建者builder
                 Request.Builder builder = request.newBuilder();
                 //从request中获取headers，通过给定的键url_name
-                List<String> headerValues = request.headers(HttpConfig.BASE_URL_KEY );
+                List<String> headerValues = request.headers(HttpConfig.BASE_URL_KEY);
                 if (headerValues != null && headerValues.size() > 0) {
                     //如果有这个header，先将配置的header删除，因此header仅用作app和okhttp之间使用
-                    builder.removeHeader(HttpConfig.BASE_URL_KEY );
+                    builder.removeHeader(HttpConfig.BASE_URL_KEY);
                     //匹配获得新的BaseUrl
                     String urlValue = headerValues.get(0);
                     HttpUrl newBaseUrl = null;
                     if (!TextUtils.isEmpty(urlValue)) {
                         newBaseUrl = HttpUrl.parse(urlValue);
                     } else {
-                        newBaseUrl = HttpUrl.parse(HttpConfig.get().getBaseUrl());
+                        newBaseUrl = HttpUrl.parse(baseUrl);
                     }
                     //从request中获取原有的HttpUrl实例oldHttpUrl
                     HttpUrl oldHttpUrl = request.url();

@@ -3,6 +3,7 @@ package com.jzw.dev.http.client;
 
 import android.text.TextUtils;
 
+import com.jzw.dev.http.HttpConfig;
 import com.jzw.dev.http.interceptor.InterceptorUtil;
 
 import java.io.File;
@@ -23,15 +24,28 @@ import okhttp3.OkHttpClient;
  * Created by 景占午 on 2017/9/15 0015.
  */
 
-public class HttpClient {
+public final class HttpClient {
 
-    private int TIME_OUT = 60;
+    private int timeOut = 60;
     private String cacheDir = null;
     private boolean cookie = false;
     private boolean enableLog = true;
     private Map<String, String> headMap = null;
 
-    private OkHttpClient okHttpClient;
+    private HttpConfig config;
+
+    public HttpClient() {
+        new HttpClient(new HttpConfig());
+    }
+
+    public HttpClient(HttpConfig config) {
+        this.config = config;
+        timeOut = config.getTimeOut();
+        cacheDir = config.getCacheFile();
+        cookie = config.getEnableCookie();
+        enableLog = config.getEnableLog();
+        headMap = config.getHeadMap();
+    }
 
     /**
      * 设置一些头信息，默认可以不设置，
@@ -59,7 +73,7 @@ public class HttpClient {
      * @param time
      */
     public void setTimeOut(int time) {
-        TIME_OUT = time;
+        timeOut = time;
     }
 
     /**
@@ -76,11 +90,11 @@ public class HttpClient {
      *
      * @param open
      */
-    public void supportCookie(boolean open) {
+    public void setEnableCookie(boolean open) {
         cookie = open;
     }
 
-    public boolean isSupportCookie() {
+    public boolean isEnableCookie() {
         return cookie;
     }
 
@@ -94,7 +108,7 @@ public class HttpClient {
      * @return
      */
     public OkHttpClient getClient() {
-        return okHttpClient == null ? buildClient() : okHttpClient;
+        return buildClient();
     }
 
     /**
@@ -102,11 +116,11 @@ public class HttpClient {
      *
      * @return
      */
-    public OkHttpClient buildClient() {
+    private OkHttpClient buildClient() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.connectTimeout(TIME_OUT, TimeUnit.SECONDS);
-        builder.readTimeout(TIME_OUT, TimeUnit.SECONDS);
-        builder.writeTimeout(TIME_OUT, TimeUnit.SECONDS);
+        builder.connectTimeout(timeOut, TimeUnit.SECONDS);
+        builder.readTimeout(timeOut, TimeUnit.SECONDS);
+        builder.writeTimeout(timeOut, TimeUnit.SECONDS);
 
         //http缓存文件路劲
         if (!TextUtils.isEmpty(cacheDir)) {
@@ -114,7 +128,7 @@ public class HttpClient {
             builder.cache(new Cache(cacheFile, 10 * 1024 * 1024));
         }
 
-        if (isSupportCookie()) {
+        if (isEnableCookie()) {
             //增加Cookie支持
             builder.cookieJar(new CookieJar() {
                 //保存cookie的键值对
@@ -137,12 +151,16 @@ public class HttpClient {
         //添加一个拦截器，对请求都统一处理，这样做的好处是不用每次在ApiService的请求中配置
         builder.addInterceptor(InterceptorUtil.getHeadInterceptor(headMap));
         //添加动态修改baseUrl的拦截器
-        builder.addInterceptor(InterceptorUtil.setBaseUrlInterceptor());
+        //builder.addInterceptor(InterceptorUtil.setBaseUrlInterceptor(config.getBaseUrl()));
         //添加一个日志拦截器
         if (isEnableLog()) {
             builder.addInterceptor(InterceptorUtil.getLogInterceptor());
         }
-        okHttpClient = builder.build();
-        return okHttpClient;
+
+        return builder.build();
+    }
+
+    public HttpConfig getConfig() {
+        return config;
     }
 }

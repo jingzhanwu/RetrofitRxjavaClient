@@ -1,6 +1,5 @@
 package com.jzw.dev.http.callback;
 
-import android.app.Activity;
 import android.content.Context;
 
 import com.jzw.dev.http.ProgressHelp;

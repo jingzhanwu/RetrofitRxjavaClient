@@ -4,30 +4,51 @@
 第一次在项目上使用这些新技术，写的不好，还希望大家多提宝贵意见。
 
   如何引入：
-  compile 'com.jzw:http-retrofit:2.1' 引入即可。
+  compile 'com.jzw:http-retrofit:2.6' 引入即可。
  
 
  代码中如何使用：
 
  1.初始化配置
  
-       HttpConfig.get()
-       .setBaseUrl("http://...")
-       .create();
+       HttpManager.get().init(new HttpConfig()
+                             .setBaseUrl("http://192.168.0.100:8080/")
+                             .setTimeOut(60)
+                             .setHeadMap(map)));
 
        如果需要额外配置头信息，或者自定义超时时间，只需要在后面加上即可
         Map<String, String> map = new HashMap<>();
         map.put("Authorization", "");
         map.put("user-agent", "android");
 
-        HttpConfig.init()
-                .setBaseUrl("http://...")
-                .setTimeOut(30)
-                .setHeadMap(map)
-                .create();
+        HttpManager.get().init(new HttpConfig()
+             .setBaseUrl("http://192.168.0.100:8080/")
+             .setTimeOut(60)
+             .setHeadMap(map)));
 
-    支持动态配置baseUrl。
-    在接口中使用@Headers({HttpConfig.BASE_URL_KEY+":http://..."})
+
+        设置请求响应监听器，处理特殊的响应结果
+         HttpManager.get().init(new HttpConfig()
+                     .setBaseUrl("http://192.168.0.100:8080/")
+                     .setTimeOut(60)
+                     .setHeadMap(map))
+                     .setOnHttpResponseCallback(new OnHttpResponseCallback() {
+                            @Override
+                            public void onResponse(int code, ApiException ex, Response response) {
+
+                            }
+                     });
+
+    支持动态配置baseUrl，请求头，在接口调用时设置
+      BaseUrl设置
+      HttpManager.get().setBaseUrl().request....
+
+      全局请求头变更：
+      HttpManager.get().setHeaders()
+
+      临时请求头变更（当次请求有效）
+      HttpManager.get().setLocalHeaders()
+
     
  2.调用
 
