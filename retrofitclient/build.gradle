@@ -38,3 +38,4 @@ dependencies {
 }
 
 apply from:"upload.gradle"
+apply from:"maven_push.gradle"
