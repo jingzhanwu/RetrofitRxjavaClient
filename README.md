@@ -4,7 +4,7 @@
 第一次在项目上使用这些新技术，写的不好，还希望大家多提宝贵意见。
 
   如何引入：
-  compile 'com.jzw:http-retrofit:2.6.0' 引入即可。
+  compile 'com.jzw:http-retrofit:2.6.1' 引入即可。
  
 
  代码中如何使用：

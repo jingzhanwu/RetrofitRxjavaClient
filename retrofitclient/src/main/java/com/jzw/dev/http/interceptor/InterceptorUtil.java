@@ -6,6 +6,7 @@ import android.util.Log;
 
 
 import com.jzw.dev.http.HttpConfig;
+import com.jzw.dev.http.callback.OnHttpResponseCallback;
 
 import java.io.IOException;
 import java.util.List;
@@ -91,6 +92,29 @@ public class InterceptorUtil {
                 } else {
                     return chain.proceed(request);
                 }
+            }
+        };
+    }
+
+
+    /**
+     * 响应拦截器
+     *
+     * @param callbacks
+     * @return
+     */
+    public static Interceptor setOnResponseCallback(final List<OnHttpResponseCallback> callbacks) {
+        return new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request();
+                Response response = chain.proceed(request);
+                if (callbacks != null) {
+                    for (OnHttpResponseCallback callback : callbacks) {
+                        callback.onResponse(response.code(), null, null);
+                    }
+                }
+                return response;
             }
         };
     }

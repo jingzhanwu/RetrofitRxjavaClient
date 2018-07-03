@@ -4,6 +4,7 @@ package com.jzw.dev.http.client;
 import android.text.TextUtils;
 
 import com.jzw.dev.http.HttpConfig;
+import com.jzw.dev.http.callback.OnHttpResponseCallback;
 import com.jzw.dev.http.interceptor.InterceptorUtil;
 
 import java.io.File;
@@ -33,6 +34,7 @@ public final class HttpClient {
     private Map<String, String> headMap = null;
 
     private HttpConfig config;
+    private List<OnHttpResponseCallback> responseCallbacks;
 
     public HttpClient() {
         new HttpClient(new HttpConfig());
@@ -45,6 +47,13 @@ public final class HttpClient {
         cookie = config.getEnableCookie();
         enableLog = config.getEnableLog();
         headMap = config.getHeadMap();
+    }
+
+    public void setOnHttpResoonseCallback(OnHttpResponseCallback callback) {
+        if (responseCallbacks == null) {
+            responseCallbacks = new ArrayList<>();
+        }
+        this.responseCallbacks.add(callback);
     }
 
     /**
@@ -151,7 +160,9 @@ public final class HttpClient {
         //添加一个拦截器，对请求都统一处理，这样做的好处是不用每次在ApiService的请求中配置
         builder.addInterceptor(InterceptorUtil.getHeadInterceptor(headMap));
         //添加动态修改baseUrl的拦截器
-        //builder.addInterceptor(InterceptorUtil.setBaseUrlInterceptor(config.getBaseUrl()));
+        builder.addInterceptor(InterceptorUtil.setBaseUrlInterceptor(config.getBaseUrl()));
+        //添加响应你拦截器
+       // builder.addInterceptor(InterceptorUtil.setOnResponseCallback(responseCallbacks));
         //添加一个日志拦截器
         if (isEnableLog()) {
             builder.addInterceptor(InterceptorUtil.getLogInterceptor());

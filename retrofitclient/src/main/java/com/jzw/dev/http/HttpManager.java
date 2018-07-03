@@ -55,6 +55,9 @@ public class HttpManager {
             responseCallbacks = new ArrayList<>();
         }
         this.responseCallbacks.add(callback);
+        if (okhttpClient != null) {
+            httpClient.setOnHttpResoonseCallback(callback);
+        }
         return this;
     }
 
@@ -155,6 +158,14 @@ public class HttpManager {
      */
     public HttpConfig getConfig() {
         return config;
+    }
+
+    public OkHttpClient getOkhttpClient() {
+        return okHttpTempClient == null ? okhttpClient : okHttpTempClient;
+    }
+
+    public HttpClient getHttpClient() {
+        return httpClient;
     }
 
     /**
