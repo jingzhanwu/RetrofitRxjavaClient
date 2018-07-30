@@ -10,7 +10,7 @@ import java.util.Map;
  * @change
  * @describe okhttp请求的统一配置参数
  **/
-public class HttpConfig {
+public class HttpConfig implements Cloneable {
     /*缓存文件地址*/
     private String mCacheFile = null;
     /*base Url*/
@@ -128,5 +128,28 @@ public class HttpConfig {
 
     public int getTimeOut() {
         return mTimeOut;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpConfig{" +
+                "mCacheFile='" + mCacheFile + '\'' +
+                ", mBaseUrl='" + mBaseUrl + '\'' +
+                ", mTimeOut=" + mTimeOut +
+                ", mEnableLog=" + mEnableLog +
+                ", mCookie=" + mCookie +
+                ", mHeadMap=" + mHeadMap +
+                '}';
+    }
+
+    @Override
+    protected Object clone() {
+        HttpConfig config = null;
+        try {
+            config = (HttpConfig) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return config;
     }
 }

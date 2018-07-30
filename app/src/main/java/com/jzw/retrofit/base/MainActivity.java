@@ -2,6 +2,7 @@ package com.jzw.retrofit.base;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
@@ -23,34 +24,86 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
-
-    private TextView tvButton;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Map<String, String> map = new HashMap<>();
-        map.put("Content-Type", "application/json;charset=UTF-8");
 
-        HttpManager.get().init(new HttpConfig()
-                .setBaseUrl("http://192.168.0.100:8080/")
-                .setTimeOut(60)
-                .setHeadMap(map))
-                .setOnHttpResponseCallback(new OnHttpResponseCallback() {
-                    @Override
-                    public void onResponse(int code, ApiException ex, Response response) {
+        findViewById(R.id.btn_init).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String token = "";
+                Map<String, String> map = new HashMap<>();
+                map.put("Authorization", token);
 
-                    }
-                });
+                HttpConfig config = new HttpConfig();
+                config.setBaseUrl("http://192.168.....");
+                config.setEnableLog(true);
+                config.setHeadMap(map);
+
+                HttpManager.get().init(config);
+            }
+        });
+
+        //普通请求
+        findViewById(R.id.btn_1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                request();
+            }
+        });
+
+        //设置临时头
+        findViewById(R.id.btn_2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setHead();
+            }
+        });
 
         //requestTest();
         //uploadFile();
     }
 
-    public void testHttp(View v) {
+    public void setHead() {
+        Map<String, String> map = new HashMap<>();
+        map.put("User-Agent", "jingzhanwu");
 
+        Call<Object> call = HttpManager.get()
+                .setBaseUrl("http://192.168.20.89")
+                .setLocalHeaders(map)
+                .getApiService(ApiService.class).getDispatchCount();
+
+        HttpManager.get().request(call, new OnRequestListener<Object>() {
+            @Override
+            public void onSuccess(Object o) {
+                System.out.println("成功了》》" + o.toString());
+            }
+
+            @Override
+            public void onFaild(int code, String msg) {
+                System.out.println("失败了》》" + msg);
+            }
+        });
     }
+
+
+    public void request() {
+        Call<Object> call = HttpManager.get()
+                .getApiService(ApiService.class).getDispatchCountGroup();
+        HttpManager.get().request(call, new OnRequestListener<Object>() {
+            @Override
+            public void onSuccess(Object o) {
+                System.out.println("成功了》》" + o.toString());
+            }
+
+            @Override
+            public void onFaild(int code, String msg) {
+                System.out.println("失败了》》" + msg);
+            }
+        });
+    }
+
 
     /**
      * 普通请求的几种方式

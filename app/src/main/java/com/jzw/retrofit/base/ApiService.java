@@ -2,6 +2,8 @@ package com.jzw.retrofit.base;
 
 
 import java.util.List;
+import java.util.Map;
+
 import io.reactivex.Observable;
 import okhttp3.MultipartBody;
 import retrofit2.Call;
@@ -18,6 +20,13 @@ import retrofit2.http.Part;
  * @describe describe
  **/
 public interface ApiService {
+
+    @GET("/dispatchCount")
+    Call<Object> getDispatchCount();
+
+    @GET("/dispatchCountByType")
+    Call<Object> getDispatchCountGroup();
+
 
     @GET("cms/content/usingHelp")
     Call<String> testRetrofit();

@@ -1,6 +1,8 @@
 package com.jzw.dev.http;
 
 
+import android.util.Log;
+
 import com.jzw.dev.http.callback.FileUploadObserver;
 import com.jzw.dev.http.callback.OnHttpResponseCallback;
 import com.jzw.dev.http.client.HttpClient;
@@ -11,6 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,10 +47,8 @@ public class HttpManager {
     private HttpClient httpClient;
     private OkHttpClient okhttpClient;
     private OkHttpClient okHttpTempClient;
-    private HttpConfig config;
+    private HttpConfig mConfig;
     private String mBaseUrl;
-    private Map<String, String> mHeadMap = null;
-
     private List<OnHttpResponseCallback> responseCallbacks;
 
     public HttpManager setOnHttpResponseCallback(OnHttpResponseCallback callback) {
@@ -55,10 +56,10 @@ public class HttpManager {
             responseCallbacks = new ArrayList<>();
         }
         this.responseCallbacks.add(callback);
-        if (okhttpClient != null) {
+        if (httpClient != null) {
             httpClient.setOnHttpResoonseCallback(callback);
         }
-        return this;
+        return mInstance;
     }
 
     private HttpManager() {
@@ -87,12 +88,11 @@ public class HttpManager {
      * @param httpConfig
      */
     public HttpManager init(HttpConfig httpConfig) {
-        this.config = httpConfig;
-        this.mBaseUrl = config.getBaseUrl();
-        this.mHeadMap = config.getHeadMap();
-        this.httpClient = new HttpClient(config);
+        this.mConfig = httpConfig;
+        this.mBaseUrl = mConfig.getBaseUrl();
+        this.httpClient = new HttpClient(mConfig);
         this.okhttpClient = httpClient.getClient();
-        return this;
+        return mInstance;
     }
 
     /**
@@ -103,28 +103,65 @@ public class HttpManager {
      */
     public HttpManager setBaseUrl(String baseUrl) {
         this.mBaseUrl = baseUrl;
-        return this;
+        return mInstance;
     }
 
     /**
      * 设置全局头信息
      *
      * @param headMap
+     * @param reset   是否覆盖之前的头
      * @return
      */
-    public HttpManager setHeaders(Map<String, String> headMap) {
-        config.setHeadMap(headMap);
-        httpClient = new HttpClient(config);
+    public HttpManager setHeaders(Map<String, String> headMap, boolean reset) {
+        Map<String, String> oldHead = mConfig.getHeadMap();
+        if (!reset && oldHead != null && headMap != null) {
+            for (Map.Entry<String, String> map : headMap.entrySet()) {
+                oldHead.put(map.getKey(), map.getValue());
+            }
+        } else {
+            oldHead = headMap;
+        }
+        mConfig.setHeadMap(oldHead);
+        httpClient = new HttpClient(mConfig);
         okhttpClient = httpClient.getClient();
         okHttpTempClient = null;
-        return this;
+        return mInstance;
+    }
+
+    public HttpManager setHeaders(Map<String, String> headMap) {
+        return setHeaders(headMap, false);
+    }
+
+    /**
+     * 设置本次请求的临时请求头
+     *
+     * @param tempHeaders
+     * @param resetAll    是否覆盖之前的头
+     * @return
+     */
+    public HttpManager setLocalHeaders(Map<String, String> tempHeaders, boolean resetAll) {
+        HttpConfig tempConfig = (HttpConfig) mConfig.clone();
+        Map<String, String> newHeader = new HashMap<>();
+        if (tempConfig.getHeadMap() != null) {
+            for (Map.Entry<String, String> p : tempConfig.getHeadMap().entrySet()) {
+                newHeader.put(p.getKey(), p.getValue());
+            }
+        }
+        if (!resetAll && tempHeaders != null) {
+            for (Map.Entry<String, String> map : tempHeaders.entrySet()) {
+                newHeader.put(map.getKey(), map.getValue());
+            }
+        } else {
+            newHeader = tempHeaders;
+        }
+        tempConfig.setHeadMap(newHeader);
+        okHttpTempClient = new HttpClient(tempConfig).getClient();
+        return mInstance;
     }
 
     public HttpManager setLocalHeaders(Map<String, String> tempHeaders) {
-        HttpConfig tempConfig = config;
-        tempConfig.setHeadMap(tempHeaders);
-        okHttpTempClient = new HttpClient(tempConfig).getClient();
-        return this;
+        return setLocalHeaders(tempHeaders, false);
     }
 
     /**
@@ -142,11 +179,13 @@ public class HttpManager {
                 .addConverterFactory(GsonConverterFactory.create(buildGson()))
                 //添加Rxjava的支持，把Retrofit转成Rxjava可用的适配类
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .client(okHttpTempClient == null ? okhttpClient : okHttpTempClient);
+                .client(okHttpTempClient != null ? okHttpTempClient : okhttpClient);
 
         Retrofit retrofit = rbuilder.build();
+
         //将url回归，有可能本次请求有设置的临时baseUrl
-        mBaseUrl = config.getBaseUrl();
+        mBaseUrl = mConfig.getBaseUrl();
+        //临时客户端置为null
         okHttpTempClient = null;
         return retrofit;
     }
@@ -157,7 +196,7 @@ public class HttpManager {
      * @return
      */
     public HttpConfig getConfig() {
-        return config;
+        return mConfig;
     }
 
     public OkHttpClient getOkhttpClient() {
