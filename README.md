@@ -1,10 +1,9 @@
 # RetrofitRxjavaClient
 
-这是一个使用Retrofit2 + Rxjava2 + okhttp3封装的一个简易型的网络请求库，
-第一次在项目上使用这些新技术，写的不好，还希望大家多提宝贵意见。
+这是一个使用Retrofit2 + Rxjava2 + okhttp3封装的一个简易型的网络请求库
 
   如何引入：
-  compile 'com.jzw:http-retrofit:2.6.2' 引入即可。
+  compile 'com.jzw:http-retrofit:2.6.6' 引入即可。
  
 
  代码中如何使用：
@@ -13,8 +12,7 @@
  
        HttpManager.get().init(new HttpConfig()
                              .setBaseUrl("http://192.168.0.100:8080/")
-                             .setTimeOut(60)
-                             .setHeadMap(map)));
+                             .setTimeOut(60));
 
        如果需要额外配置头信息，或者自定义超时时间，只需要在后面加上即可
         Map<String, String> map = new HashMap<>();
@@ -27,11 +25,8 @@
              .setHeadMap(map)));
 
 
-        设置请求响应监听器，处理特殊的响应结果
-         HttpManager.get().init(new HttpConfig()
-                     .setBaseUrl("http://192.168.0.100:8080/")
-                     .setTimeOut(60)
-                     .setHeadMap(map))
+        设置请求响应监听拦截器器，处理特殊的响应结果
+         HttpManager.get()
                      .setOnHttpResponseCallback(new OnHttpResponseCallback() {
                             @Override
                             public void onResponse(int code, ApiException ex, Response response) {
@@ -51,6 +46,19 @@
 
     
  2.调用
+  
+     首页定义ApiService: 里面定义请求接口，具体的定义可查阅Rest full 接口规范，例如：
+     
+      //post 请求
+       @POST("/message/message/batchUpdateReaded")
+       Call<ResultObj> updateNoticeStatus(@Query("msgIds") String ids);
+  
+        //get 请求
+     @GET("/message/message/findUserMsgCount")
+        Call<ResultObj<String>> findMessageCount(@Query("userId") String userId,
+                                                 @Query("readStatus") String status,
+                                                 @Query("type") String type);
+      
 
     （1）配合rxjava方式
 
