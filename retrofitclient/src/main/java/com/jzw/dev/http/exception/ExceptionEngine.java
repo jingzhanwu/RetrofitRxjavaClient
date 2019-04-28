@@ -2,6 +2,7 @@ package com.jzw.dev.http.exception;
 
 import android.util.MalformedJsonException;
 
+
 import com.google.gson.JsonParseException;
 
 import org.json.JSONException;
@@ -36,13 +37,15 @@ public class ExceptionEngine {
             ServerException serverExc = (ServerException) e;
             ex = new ApiException(serverExc, serverExc.getCode());
             return ex;
-        } else if (e instanceof JsonParseException
+        }
+        else if (e instanceof JsonParseException
                 || e instanceof JSONException
                 || e instanceof ParseException || e instanceof MalformedJsonException) {  //解析数据错误
             ex = new ApiException(e, ANALYTIC_SERVER_DATA_ERROR);
             ex.setMsg("数据解析错误");
             return ex;
-        } else if (e instanceof ConnectException) {//连接网络错误
+        }
+        else if (e instanceof ConnectException) {//连接网络错误
             ex = new ApiException(e, CONNECT_ERROR);
             ex.setMsg("请检查网络连接");
             return ex;

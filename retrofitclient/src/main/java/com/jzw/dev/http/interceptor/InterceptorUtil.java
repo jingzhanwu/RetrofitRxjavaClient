@@ -111,7 +111,7 @@ public class InterceptorUtil {
                 Response response = chain.proceed(request);
                 if (callbacks != null) {
                     for (OnHttpResponseCallback callback : callbacks) {
-                        callback.onResponse(response.code(), null, null);
+                        callback.onResponse(response.code(), null,null);
                     }
                 }
                 return response;

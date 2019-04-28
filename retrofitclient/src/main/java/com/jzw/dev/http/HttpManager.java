@@ -1,8 +1,5 @@
 package com.jzw.dev.http;
 
-
-import android.util.Log;
-
 import com.jzw.dev.http.callback.FileUploadObserver;
 import com.jzw.dev.http.callback.OnHttpResponseCallback;
 import com.jzw.dev.http.client.HttpClient;
@@ -43,14 +40,38 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
  */
 
 public class HttpManager {
-    private static HttpManager mInstance;
     private HttpClient httpClient;
     private OkHttpClient okhttpClient;
     private OkHttpClient okHttpTempClient;
+    private Retrofit.Builder retrofitBuild;
     private HttpConfig mConfig;
     private String mBaseUrl;
     private List<OnHttpResponseCallback> responseCallbacks;
 
+
+    public HttpManager(HttpConfig httpConfig) {
+        init(httpConfig);
+        retrofitBuild = getRetrofitBuild();
+    }
+
+    /**
+     * 初始化http client基本参数以及客户端实例
+     *
+     * @param httpConfig
+     */
+    private void init(HttpConfig httpConfig) {
+        this.mConfig = httpConfig;
+        this.mBaseUrl = mConfig.getBaseUrl();
+        this.httpClient = new HttpClient(mConfig);
+        this.okhttpClient = httpClient.getClient();
+    }
+
+    /**
+     * 设置响应监听器
+     *
+     * @param callback
+     * @return
+     */
     public HttpManager setOnHttpResponseCallback(OnHttpResponseCallback callback) {
         if (responseCallbacks == null) {
             responseCallbacks = new ArrayList<>();
@@ -59,40 +80,7 @@ public class HttpManager {
         if (httpClient != null) {
             httpClient.setOnHttpResoonseCallback(callback);
         }
-        return mInstance;
-    }
-
-    private HttpManager() {
-    }
-
-    /**
-     * 获取本类的一个实例对象，使用DCC的模式设计单俐
-     *
-     * @return
-     */
-    public static HttpManager get() {
-        if (mInstance == null) {
-            synchronized (HttpManager.class) {
-                if (mInstance == null) {
-                    mInstance = new HttpManager();
-                }
-            }
-        }
-        return mInstance;
-    }
-
-    /**
-     * http库初始化操作，请求开始之前，
-     * 一般放在application 中初始化
-     *
-     * @param httpConfig
-     */
-    public HttpManager init(HttpConfig httpConfig) {
-        this.mConfig = httpConfig;
-        this.mBaseUrl = mConfig.getBaseUrl();
-        this.httpClient = new HttpClient(mConfig);
-        this.okhttpClient = httpClient.getClient();
-        return mInstance;
+        return this;
     }
 
     /**
@@ -103,7 +91,7 @@ public class HttpManager {
      */
     public HttpManager setBaseUrl(String baseUrl) {
         this.mBaseUrl = baseUrl;
-        return mInstance;
+        return this;
     }
 
     /**
@@ -126,7 +114,7 @@ public class HttpManager {
         httpClient = new HttpClient(mConfig);
         okhttpClient = httpClient.getClient();
         okHttpTempClient = null;
-        return mInstance;
+        return this;
     }
 
     public HttpManager setHeaders(Map<String, String> headMap) {
@@ -157,11 +145,29 @@ public class HttpManager {
         }
         tempConfig.setHeadMap(newHeader);
         okHttpTempClient = new HttpClient(tempConfig).getClient();
-        return mInstance;
+        return this;
     }
 
     public HttpManager setLocalHeaders(Map<String, String> tempHeaders) {
         return setLocalHeaders(tempHeaders, false);
+    }
+
+    /**
+     * 构造retrofit builder对象
+     *
+     * @return
+     */
+    private Retrofit.Builder getRetrofitBuild() {
+        retrofitBuild = new Retrofit.Builder();
+        retrofitBuild.baseUrl(mBaseUrl)
+                //如果请求返回的不是json 而是字符串，则使用下面的解析器
+                .addConverterFactory(ScalarsConverterFactory.create())
+                //如果请求返回额是json则使用下面的解析器，
+                //注意：这两句的顺序不能对调，否则不能同时兼容字符串和json
+                .addConverterFactory(GsonConverterFactory.create(buildGson()))
+                //添加Rxjava的支持，把Retrofit转成Rxjava可用的适配类
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create());
+        return retrofitBuild;
     }
 
     /**
@@ -170,18 +176,11 @@ public class HttpManager {
      * @return
      */
     private Retrofit getRetrofit() {
-        Retrofit.Builder rbuilder = new Retrofit.Builder()
-                .baseUrl(mBaseUrl)
-                //如果请求返回的不是json 而是字符串，则使用下面的解析器
-                .addConverterFactory(ScalarsConverterFactory.create())
-                //如果请求返回额是json则使用下面的解析器，
-                //注意：这两句的顺序不能对调，否则不能同时兼容字符串和json
-                .addConverterFactory(GsonConverterFactory.create(buildGson()))
-                //添加Rxjava的支持，把Retrofit转成Rxjava可用的适配类
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .client(okHttpTempClient != null ? okHttpTempClient : okhttpClient);
-
-        Retrofit retrofit = rbuilder.build();
+        if (retrofitBuild == null) {
+            retrofitBuild = getRetrofitBuild();
+        }
+        retrofitBuild.client(okHttpTempClient != null ? okHttpTempClient : okhttpClient);
+        Retrofit retrofit = retrofitBuild.build();
 
         //将url回归，有可能本次请求有设置的临时baseUrl
         mBaseUrl = mConfig.getBaseUrl();
@@ -329,15 +328,15 @@ public class HttpManager {
                 call.cancel();
                 ApiException exception = new ApiException(response.code());
                 if (response.code() == 200) {
-                    if (response.body() != null) {
-                        listener.onSuccess(response.body());
+                    T body = response.body();
+                    if (body != null) {
+                        listener.onSuccess(body);
                     } else {
                         listener.onFaild(response.code(), exception.getMsg());
                     }
                 } else {
                     listener.onFaild(exception.getCode(), exception.getMsg());
                 }
-
                 dispatchResponse(response.code(), exception, response);
             }
 

@@ -27,12 +27,15 @@ import okhttp3.OkHttpClient;
 
 public final class HttpClient {
 
-    private int timeOut = 60;
+    private int timeOut = 30;
     private String cacheDir = null;
     private boolean cookie = false;
     private boolean enableLog = true;
     private Map<String, String> headMap = null;
 
+    /**
+     * http客户端配置类
+     */
     private HttpConfig config;
     private List<OnHttpResponseCallback> responseCallbacks;
 
@@ -162,7 +165,7 @@ public final class HttpClient {
         //添加动态修改baseUrl的拦截器
         builder.addInterceptor(InterceptorUtil.setBaseUrlInterceptor(config.getBaseUrl()));
         //添加响应你拦截器
-       // builder.addInterceptor(InterceptorUtil.setOnResponseCallback(responseCallbacks));
+        //builder.addInterceptor(InterceptorUtil.setOnResponseCallback(responseCallbacks));
         //添加一个日志拦截器
         if (isEnableLog()) {
             builder.addInterceptor(InterceptorUtil.getLogInterceptor());

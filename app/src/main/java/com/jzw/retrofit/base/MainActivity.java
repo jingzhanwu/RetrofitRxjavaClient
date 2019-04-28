@@ -2,28 +2,31 @@ package com.jzw.retrofit.base;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
-import android.widget.TextView;
 
 import com.jzw.dev.http.HttpConfig;
 import com.jzw.dev.http.HttpManager;
-import com.jzw.dev.http.ProgressHelp;
-import com.jzw.dev.http.callback.OnHttpResponseCallback;
 import com.jzw.dev.http.callback.OnRequestListener;
 import com.jzw.dev.http.callback.ProgressObserver;
 import com.jzw.dev.http.callback.SimpleObserver;
-import com.jzw.dev.http.exception.ApiException;
 
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
-import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
+    private HttpManager httpManager;
+
+    private String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ4dWViaW5nIiwianRpIjoiZGFvc2h1IiwiaWF0IjoxNTU2MjYwNjM3LCJpc3MiOiJodHRwOi8vZGFvc2h1LmNvbSJ9.7KEmyf6vHLNbrZ6LNr8k9dW-KmiOH6UnqP1fabvTLYyupUJ77HbEXixHeoiGaYSqxF9oOasExHpj5N6lQAOmmQ";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,49 +35,70 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_init).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String token = "";
+                // String token = "token";
                 Map<String, String> map = new HashMap<>();
                 map.put("Authorization", token);
 
                 HttpConfig config = new HttpConfig();
-                config.setBaseUrl("http://192.168.....");
+                config.setBaseUrl("http://10.168.31.223:9051/");
                 config.setEnableLog(true);
                 config.setHeadMap(map);
 
-                HttpManager.get().init(config);
+                httpManager = new HttpManager(config);
             }
         });
 
-        //普通请求
         findViewById(R.id.btn_1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                request();
+                queryMicroGroups(false);
             }
         });
 
-        //设置临时头
-        findViewById(R.id.btn_2).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setHead();
-            }
-        });
-
-        //requestTest();
-        //uploadFile();
     }
+
+
+    /**
+     * 查询微群列表
+     *
+     * @param isSearch
+     */
+    public void queryMicroGroups(boolean isSearch) {
+        JSONObject json = new JSONObject();
+        if (isSearch) {
+            try {
+                json.put("title", "");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        RequestBody body = RequestBody.create(MediaType.parse("application/json"), json.toString());
+        Call<Rsp<MicroGroup>> call = httpManager.getApiService(ApiService.class)
+                .queryMicroGroupList(body);
+        httpManager.request(call, new OnRequestListener<Rsp<MicroGroup>>() {
+            @Override
+            public void onSuccess(Rsp<MicroGroup> mg) {
+
+            }
+
+            @Override
+            public void onFaild(int code, String msg) {
+
+            }
+        });
+    }
+
 
     public void setHead() {
         Map<String, String> map = new HashMap<>();
         map.put("User-Agent", "jingzhanwu");
 
-        Call<Object> call = HttpManager.get()
+        Call<Object> call = httpManager
                 .setBaseUrl("http://192.168.20.89")
                 .setLocalHeaders(map)
                 .getApiService(ApiService.class).getDispatchCount();
 
-        HttpManager.get().request(call, new OnRequestListener<Object>() {
+        httpManager.request(call, new OnRequestListener<Object>() {
             @Override
             public void onSuccess(Object o) {
                 System.out.println("成功了》》" + o.toString());
@@ -89,9 +113,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void request() {
-        Call<Object> call = HttpManager.get()
+        Call<Object> call = httpManager
                 .getApiService(ApiService.class).getDispatchCountGroup();
-        HttpManager.get().request(call, new OnRequestListener<Object>() {
+        httpManager.request(call, new OnRequestListener<Object>() {
             @Override
             public void onSuccess(Object o) {
                 System.out.println("成功了》》" + o.toString());
@@ -113,8 +137,8 @@ public class MainActivity extends AppCompatActivity {
          * 返回值是Observable的集中使用方法
          */
 
-        Observable<String> observable = HttpManager.get().getApiService(ApiService.class).testRxjava();
-        HttpManager.get().subscriber(observable, new SimpleObserver<String>() {
+        Observable<String> observable = httpManager.getApiService(ApiService.class).testRxjava();
+        httpManager.subscriber(observable, new SimpleObserver<String>() {
             @Override
             public void onSuccess(String s) {
 
@@ -126,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //带进度条
-        HttpManager.get().subscriber(observable, new ProgressObserver<String>(this) {
+        httpManager.subscriber(observable, new ProgressObserver<String>(this) {
             @Override
             public void onSuccess(String s) {
 
@@ -141,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         /**
          * rxjava2 中使用 Consumer的用法，只是回掉不一样
          */
-        HttpManager.get().subscriber(observable, new OnRequestListener<String>() {
+        httpManager.subscriber(observable, new OnRequestListener<String>() {
             @Override
             public void onSuccess(String s) {
 
@@ -154,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //带进度条
-        HttpManager.get().subscriber(observable, new OnRequestListener<String>(this) {
+        httpManager.subscriber(observable, new OnRequestListener<String>(this) {
             @Override
             public void onSuccess(String s) {
 
@@ -169,8 +193,8 @@ public class MainActivity extends AppCompatActivity {
         /**
          * 普通的请求，不适用rxjava的方式
          */
-        Call<String> call = HttpManager.get().getApiService(ApiService.class).testRetrofit();
-        HttpManager.get()
+        Call<String> call = httpManager.getApiService(ApiService.class).testRetrofit();
+        httpManager
                 .setBaseUrl("http://10.1.1.1:8080/")
                 .setHeaders(null)
                 .setLocalHeaders(null)

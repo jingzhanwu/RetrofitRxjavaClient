@@ -11,7 +11,7 @@ import com.jzw.dev.http.ProgressHelp;
  * @change
  * @describe 回掉接口
  **/
-public abstract class OnRequestListener<T> {
+public  abstract class OnRequestListener<T> {
     /**
      * 一般情况下使用的构造函数，
      */

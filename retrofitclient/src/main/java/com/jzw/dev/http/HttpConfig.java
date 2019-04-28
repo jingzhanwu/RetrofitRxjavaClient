@@ -16,7 +16,7 @@ public class HttpConfig implements Cloneable {
     /*base Url*/
     private String mBaseUrl = "";
     /*超时时间*/
-    private int mTimeOut = 60;
+    private int mTimeOut = 30;
     /*是否打开log*/
     private boolean mEnableLog = true;
     /*是否开启cookie*/
