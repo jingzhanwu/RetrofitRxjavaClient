@@ -23,11 +23,13 @@ public class HttpConfig implements Cloneable {
     private boolean mCookie = false;
     /*头信息*/
     private Map<String, String> mHeadMap = null;
+    /*是否开启https，默认false*/
+    private boolean mHttps = false;
 
     /**
      * 设置请求头的baseurl的key值
      */
-    public final static String BASE_URL_KEY = "baseurl_key_name";
+    public static String BASE_URL_KEY = "baseurl_key_name";
 
     public HttpConfig() {
     }
@@ -55,6 +57,18 @@ public class HttpConfig implements Cloneable {
         this.mEnableLog = enable;
         return this;
     }
+
+    /**
+     * 是否开启https
+     *
+     * @param https
+     * @return
+     */
+    public HttpConfig setHttps(boolean https) {
+        this.mHttps = https;
+        return this;
+    }
+
 
     /**
      * 是否开启Cookie
@@ -105,6 +119,10 @@ public class HttpConfig implements Cloneable {
     /****************************************************************************************/
     /************************* get方法，获取设置的各个参数值***********************************/
 
+
+    public boolean getHttps() {
+        return mHttps;
+    }
 
     public String getBaseUrl() {
         return mBaseUrl;

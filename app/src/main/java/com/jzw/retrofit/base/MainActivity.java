@@ -7,25 +7,20 @@ import android.view.View;
 import com.jzw.dev.http.HttpConfig;
 import com.jzw.dev.http.HttpManager;
 import com.jzw.dev.http.callback.OnRequestListener;
-import com.jzw.dev.http.callback.ProgressObserver;
-import com.jzw.dev.http.callback.SimpleObserver;
+import com.jzw.dev.http.exception.ApiException;
+import com.jzw.dev.http.interceptor.OnInterceptorCallback;
 
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import io.reactivex.Observable;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
+import okhttp3.Request;
+import okhttp3.Response;
 import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
-    private HttpManager httpManager;
 
-    private String token = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ4dWViaW5nIiwianRpIjoiZGFvc2h1IiwiaWF0IjoxNTU2MjYwNjM3LCJpc3MiOiJodHRwOi8vZGFvc2h1LmNvbSJ9.7KEmyf6vHLNbrZ6LNr8k9dW-KmiOH6UnqP1fabvTLYyupUJ77HbEXixHeoiGaYSqxF9oOasExHpj5N6lQAOmmQ";
+    private String mToken = "363786482777075712";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,179 +32,58 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // String token = "token";
                 Map<String, String> map = new HashMap<>();
-                map.put("Authorization", token);
+                map.put("Authorization", mToken);
 
                 HttpConfig config = new HttpConfig();
-                config.setBaseUrl("http://10.168.31.223:9051/");
+                config.setBaseUrl("https://apidev.lakeapp.cn/");
                 config.setEnableLog(true);
+                config.setHttps(true);
                 config.setHeadMap(map);
 
-                httpManager = new HttpManager(config);
-            }
-        });
+                HttpManager.Get().init(config);
 
-        findViewById(R.id.btn_1).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                queryMicroGroups(false);
-            }
-        });
-
-    }
-
-
-    /**
-     * 查询微群列表
-     *
-     * @param isSearch
-     */
-    public void queryMicroGroups(boolean isSearch) {
-        JSONObject json = new JSONObject();
-        if (isSearch) {
-            try {
-                json.put("title", "");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        RequestBody body = RequestBody.create(MediaType.parse("application/json"), json.toString());
-        Call<Rsp<MicroGroup>> call = httpManager.getApiService(ApiService.class)
-                .queryMicroGroupList(body);
-        httpManager.request(call, new OnRequestListener<Rsp<MicroGroup>>() {
-            @Override
-            public void onSuccess(Rsp<MicroGroup> mg) {
-
-            }
-
-            @Override
-            public void onFaild(int code, String msg) {
-
-            }
-        });
-    }
-
-
-    public void setHead() {
-        Map<String, String> map = new HashMap<>();
-        map.put("User-Agent", "jingzhanwu");
-
-        Call<Object> call = httpManager
-                .setBaseUrl("http://192.168.20.89")
-                .setLocalHeaders(map)
-                .getApiService(ApiService.class).getDispatchCount();
-
-        httpManager.request(call, new OnRequestListener<Object>() {
-            @Override
-            public void onSuccess(Object o) {
-                System.out.println("成功了》》" + o.toString());
-            }
-
-            @Override
-            public void onFaild(int code, String msg) {
-                System.out.println("失败了》》" + msg);
-            }
-        });
-    }
-
-
-    public void request() {
-        Call<Object> call = httpManager
-                .getApiService(ApiService.class).getDispatchCountGroup();
-        httpManager.request(call, new OnRequestListener<Object>() {
-            @Override
-            public void onSuccess(Object o) {
-                System.out.println("成功了》》" + o.toString());
-            }
-
-            @Override
-            public void onFaild(int code, String msg) {
-                System.out.println("失败了》》" + msg);
-            }
-        });
-    }
-
-
-    /**
-     * 普通请求的几种方式
-     */
-    public void requestTest() {
-        /**
-         * 返回值是Observable的集中使用方法
-         */
-
-        Observable<String> observable = httpManager.getApiService(ApiService.class).testRxjava();
-        httpManager.subscriber(observable, new SimpleObserver<String>() {
-            @Override
-            public void onSuccess(String s) {
-
-            }
-
-            @Override
-            public void onFailure(int errorCode, String msg) {
-
-            }
-        });
-        //带进度条
-        httpManager.subscriber(observable, new ProgressObserver<String>(this) {
-            @Override
-            public void onSuccess(String s) {
-
-            }
-
-            @Override
-            public void onFailure(int errorCode, String msg) {
-
-            }
-        });
-
-        /**
-         * rxjava2 中使用 Consumer的用法，只是回掉不一样
-         */
-        httpManager.subscriber(observable, new OnRequestListener<String>() {
-            @Override
-            public void onSuccess(String s) {
-
-            }
-
-            @Override
-            public void onFaild(int code, String msg) {
-
-            }
-        });
-
-        //带进度条
-        httpManager.subscriber(observable, new OnRequestListener<String>(this) {
-            @Override
-            public void onSuccess(String s) {
-
-            }
-
-            @Override
-            public void onFaild(int code, String msg) {
-
-            }
-        });
-
-        /**
-         * 普通的请求，不适用rxjava的方式
-         */
-        Call<String> call = httpManager.getApiService(ApiService.class).testRetrofit();
-        httpManager
-                .setBaseUrl("http://10.1.1.1:8080/")
-                .setHeaders(null)
-                .setLocalHeaders(null)
-                .request(call, new OnRequestListener<String>(this) {
+                HttpManager.Get().setOnInterceptorCallback(new OnInterceptorCallback() {
                     @Override
-                    public void onSuccess(String s) {
+                    public Request onRequest(Request request) {
+                        String token = request.header("Authorization");
+                        System.out.println("设置的token：" + token);
+                        Request.Builder builder = request.newBuilder();
+                        builder.removeHeader("Authorization");
+                        builder.addHeader("Authorization", "155555555555");
 
+                        request = builder.build();
+                        return request;
                     }
 
                     @Override
-                    public void onFaild(int code, String msg) {
-
+                    public void onResponse(int code, ApiException ex, retrofit2.Response response) {
+                        System.out.println("响应code：" + code + "原始code:" + response.code());
                     }
                 });
 
+
+                get();
+            }
+        });
+
     }
+
+
+    private void get() {
+        Call<String> call = HttpManager.Get().getApiService(ApiService.class).banding();
+        HttpManager.Get().request(call, new OnRequestListener<String>() {
+            @Override
+            public void onSuccess(String s) {
+                System.out.println("结果：" + s);
+            }
+
+            @Override
+            public void onFaild(int code, String msg) {
+
+                System.out.println("错误：" + msg);
+            }
+        });
+    }
+
 }
 

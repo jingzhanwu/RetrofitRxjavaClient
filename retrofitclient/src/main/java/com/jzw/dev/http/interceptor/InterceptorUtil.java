@@ -6,7 +6,6 @@ import android.util.Log;
 
 
 import com.jzw.dev.http.HttpConfig;
-import com.jzw.dev.http.callback.OnHttpResponseCallback;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,7 +32,7 @@ public class InterceptorUtil {
      *
      * @return
      */
-    public static Interceptor getHeadInterceptor(final Map<String, String> headMap) {
+    public static Interceptor getHeadInterceptor(final Map<String, String> headMap, final OnInterceptorCallback callback) {
         return new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
@@ -52,7 +51,15 @@ public class InterceptorUtil {
                 }
                 builder.removeHeader("Pragma");
 
-                return chain.proceed(builder.build());
+                Request request = builder.build();
+                //如果外部有设置request拦截处理监听，则以最终设置为准
+                if (callback != null) {
+                    Request req = callback.onRequest(request);
+                    if (req != null) {
+                        request = req;
+                    }
+                }
+                return chain.proceed(request);
             }
         };
     }
@@ -100,19 +107,17 @@ public class InterceptorUtil {
     /**
      * 响应拦截器
      *
-     * @param callbacks
+     * @param callback
      * @return
      */
-    public static Interceptor setOnResponseCallback(final List<OnHttpResponseCallback> callbacks) {
+    public static Interceptor setOnResponseCallback(final OnInterceptorCallback callback) {
         return new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request request = chain.request();
                 Response response = chain.proceed(request);
-                if (callbacks != null) {
-                    for (OnHttpResponseCallback callback : callbacks) {
-                        callback.onResponse(response.code(), null,null);
-                    }
+                if (callback != null) {
+                    callback.onResponse(response.code(), null, null);
                 }
                 return response;
             }

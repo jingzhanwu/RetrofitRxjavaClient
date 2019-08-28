@@ -4,15 +4,27 @@ package com.jzw.dev.http.client;
 import android.text.TextUtils;
 
 import com.jzw.dev.http.HttpConfig;
-import com.jzw.dev.http.callback.OnHttpResponseCallback;
 import com.jzw.dev.http.interceptor.InterceptorUtil;
+import com.jzw.dev.http.interceptor.OnInterceptorCallback;
 
 import java.io.File;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Cache;
 import okhttp3.Cookie;
@@ -37,7 +49,7 @@ public final class HttpClient {
      * http客户端配置类
      */
     private HttpConfig config;
-    private List<OnHttpResponseCallback> responseCallbacks;
+    private OnInterceptorCallback interceptorCallback;
 
     public HttpClient() {
         new HttpClient(new HttpConfig());
@@ -52,11 +64,17 @@ public final class HttpClient {
         headMap = config.getHeadMap();
     }
 
-    public void setOnHttpResoonseCallback(OnHttpResponseCallback callback) {
-        if (responseCallbacks == null) {
-            responseCallbacks = new ArrayList<>();
-        }
-        this.responseCallbacks.add(callback);
+    /**
+     * 设置拦截器毁掉接口
+     *
+     * @param interceptorCallback
+     */
+    public void setOnInterceptorCallback(OnInterceptorCallback interceptorCallback) {
+        this.interceptorCallback = interceptorCallback;
+    }
+
+    public OnInterceptorCallback getInterceptorCallback() {
+        return interceptorCallback;
     }
 
     /**
@@ -161,11 +179,19 @@ public final class HttpClient {
             });
         }
         //添加一个拦截器，对请求都统一处理，这样做的好处是不用每次在ApiService的请求中配置
-        builder.addInterceptor(InterceptorUtil.getHeadInterceptor(headMap));
+        builder.addInterceptor(InterceptorUtil.getHeadInterceptor(headMap, interceptorCallback));
         //添加动态修改baseUrl的拦截器
         builder.addInterceptor(InterceptorUtil.setBaseUrlInterceptor(config.getBaseUrl()));
         //添加响应你拦截器
-        //builder.addInterceptor(InterceptorUtil.setOnResponseCallback(responseCallbacks));
+//        builder.addInterceptor(InterceptorUtil.setOnResponseCallback(interceptorCallback));
+        //添加https支持
+        if (config.getHttps()) {
+            SSLSocketFactory sslSocketFactory = getSSLFactory();
+            if (sslSocketFactory != null) {
+                builder.sslSocketFactory(sslSocketFactory);
+                builder.hostnameVerifier(getHostnameVerifier());
+            }
+        }
         //添加一个日志拦截器
         if (isEnableLog()) {
             builder.addInterceptor(InterceptorUtil.getLogInterceptor());
@@ -176,5 +202,53 @@ public final class HttpClient {
 
     public HttpConfig getConfig() {
         return config;
+    }
+
+
+    private SSLSocketFactory getSSLFactory() {
+        SSLSocketFactory sslSocketFactory;
+        try {
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, getTrustManager(), new SecureRandom());
+            sslSocketFactory = sslContext.getSocketFactory();
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }
+        return sslSocketFactory;
+    }
+
+    //获取TrustManager
+    private TrustManager[] getTrustManager() {
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[]{};
+                    }
+
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] chain,
+                                                   String authType) throws CertificateException {
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] chain,
+                                                   String authType) throws CertificateException {
+                    }
+                }
+        };
+        return trustAllCerts;
+    }
+
+    //获取HostnameVerifier
+    public HostnameVerifier getHostnameVerifier() {
+        HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        };
+        return hostnameVerifier;
     }
 }

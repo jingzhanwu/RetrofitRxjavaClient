@@ -1,17 +1,15 @@
 package com.jzw.dev.http;
 
 import com.jzw.dev.http.callback.FileUploadObserver;
-import com.jzw.dev.http.callback.OnHttpResponseCallback;
 import com.jzw.dev.http.client.HttpClient;
 import com.jzw.dev.http.exception.ApiException;
 import com.jzw.dev.http.exception.ExceptionEngine;
 import com.jzw.dev.http.callback.OnRequestListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.jzw.dev.http.interceptor.OnInterceptorCallback;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -43,15 +41,18 @@ public class HttpManager {
     private HttpClient httpClient;
     private OkHttpClient okhttpClient;
     private OkHttpClient okHttpTempClient;
-    private Retrofit.Builder retrofitBuild;
     private HttpConfig mConfig;
     private String mBaseUrl;
-    private List<OnHttpResponseCallback> responseCallbacks;
 
+    private HttpManager() {
+    }
 
-    public HttpManager(HttpConfig httpConfig) {
-        init(httpConfig);
-        retrofitBuild = getRetrofitBuild();
+    private static class SingletonHolder {
+        private static final HttpManager INSTANCE = new HttpManager();
+    }
+
+    public static HttpManager Get() {
+        return SingletonHolder.INSTANCE;
     }
 
     /**
@@ -59,7 +60,7 @@ public class HttpManager {
      *
      * @param httpConfig
      */
-    private void init(HttpConfig httpConfig) {
+    public void init(HttpConfig httpConfig) {
         this.mConfig = httpConfig;
         this.mBaseUrl = mConfig.getBaseUrl();
         this.httpClient = new HttpClient(mConfig);
@@ -67,18 +68,15 @@ public class HttpManager {
     }
 
     /**
-     * 设置响应监听器
+     * 设置揽件器毁掉接口
      *
      * @param callback
      * @return
      */
-    public HttpManager setOnHttpResponseCallback(OnHttpResponseCallback callback) {
-        if (responseCallbacks == null) {
-            responseCallbacks = new ArrayList<>();
-        }
-        this.responseCallbacks.add(callback);
+    public HttpManager setOnInterceptorCallback(OnInterceptorCallback callback) {
         if (httpClient != null) {
-            httpClient.setOnHttpResoonseCallback(callback);
+            httpClient.setOnInterceptorCallback(callback);
+            okhttpClient = httpClient.getClient();
         }
         return this;
     }
@@ -158,7 +156,7 @@ public class HttpManager {
      * @return
      */
     private Retrofit.Builder getRetrofitBuild() {
-        retrofitBuild = new Retrofit.Builder();
+        Retrofit.Builder retrofitBuild = new Retrofit.Builder();
         retrofitBuild.baseUrl(mBaseUrl)
                 //如果请求返回的不是json 而是字符串，则使用下面的解析器
                 .addConverterFactory(ScalarsConverterFactory.create())
@@ -176,9 +174,7 @@ public class HttpManager {
      * @return
      */
     private Retrofit getRetrofit() {
-        if (retrofitBuild == null) {
-            retrofitBuild = getRetrofitBuild();
-        }
+        Retrofit.Builder retrofitBuild = getRetrofitBuild();
         retrofitBuild.client(okHttpTempClient != null ? okHttpTempClient : okhttpClient);
         Retrofit retrofit = retrofitBuild.build();
 
@@ -306,9 +302,9 @@ public class HttpManager {
      * @param response
      */
     private void dispatchResponse(int code, ApiException ex, Response response) {
-        if (responseCallbacks != null) {
-            for (OnHttpResponseCallback callback : responseCallbacks) {
-                callback.onResponse(code, ex, response);
+        if (httpClient != null) {
+            if (httpClient.getInterceptorCallback() != null) {
+                httpClient.getInterceptorCallback().onResponse(code, ex, response);
             }
         }
     }

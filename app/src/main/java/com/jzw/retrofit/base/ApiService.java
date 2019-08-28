@@ -13,6 +13,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
+import retrofit2.http.Path;
 
 /**
  * @anthor created by Administrator
@@ -45,4 +46,8 @@ public interface ApiService {
 
     @POST("")
     Observable<String> uploadFile2(@Body MultipartBody body);
+
+
+    @GET("member/get/default")
+    Call<String> banding();
 }
