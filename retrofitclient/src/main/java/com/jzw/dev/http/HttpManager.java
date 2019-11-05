@@ -1,6 +1,8 @@
 package com.jzw.dev.http;
 
 import com.jzw.dev.http.callback.FileUploadObserver;
+import com.jzw.dev.http.callback.OnCookieCallback;
+import com.jzw.dev.http.callback.OnResponseInterceptorCallback;
 import com.jzw.dev.http.client.HttpClient;
 import com.jzw.dev.http.exception.ApiException;
 import com.jzw.dev.http.exception.ExceptionEngine;
@@ -10,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import com.jzw.dev.http.interceptor.OnInterceptorCallback;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -20,6 +23,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.Cookie;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -43,6 +47,8 @@ public class HttpManager {
     private OkHttpClient okHttpTempClient;
     private HttpConfig mConfig;
     private String mBaseUrl;
+
+    private OnResponseInterceptorCallback mResponseInterceptorCallback;
 
     private HttpManager() {
     }
@@ -68,7 +74,7 @@ public class HttpManager {
     }
 
     /**
-     * 设置揽件器毁掉接口
+     * 设置请求响应拦截器回调
      *
      * @param callback
      * @return
@@ -82,12 +88,54 @@ public class HttpManager {
     }
 
     /**
+     * 设置http 请求响应内容回调
+     *
+     * @param callback
+     * @return
+     */
+    public HttpManager setOnResponseInterceptorCallback(OnResponseInterceptorCallback callback) {
+        mResponseInterceptorCallback = callback;
+        return this;
+    }
+
+    /**
+     * 设置cookie 的处理监听器
+     *
+     * @param callback
+     */
+    public HttpManager setOnCookieCallback(OnCookieCallback callback) {
+        if (httpClient != null) {
+            httpClient.setOnCookieCallback(callback);
+        }
+        return this;
+    }
+
+    public OnCookieCallback getOnCookieCallback() {
+        if (httpClient != null) {
+            return httpClient.getOnCookieCallback();
+        }
+        return null;
+    }
+
+    /**
+     * 获取cookie保存的map
+     *
+     * @return
+     */
+    public HashMap<String, List<Cookie>> getCookieStore() {
+        if (httpClient != null) {
+            return httpClient.getCookieStore();
+        }
+        return null;
+    }
+
+    /**
      * 动态设置baseUrl，只对本次请求有效
      *
      * @param baseUrl
      * @return
      */
-    public HttpManager setBaseUrl(String baseUrl) {
+    public HttpManager setTempBaseUrl(String baseUrl) {
         this.mBaseUrl = baseUrl;
         return this;
     }
@@ -115,6 +163,12 @@ public class HttpManager {
         return this;
     }
 
+    /**
+     * 设置请求头，从新构建http客户端
+     *
+     * @param headMap
+     * @return
+     */
     public HttpManager setHeaders(Map<String, String> headMap) {
         return setHeaders(headMap, false);
     }
@@ -126,7 +180,7 @@ public class HttpManager {
      * @param resetAll    是否覆盖之前的头
      * @return
      */
-    public HttpManager setLocalHeaders(Map<String, String> tempHeaders, boolean resetAll) {
+    public HttpManager setTempHeaders(Map<String, String> tempHeaders, boolean resetAll) {
         HttpConfig tempConfig = (HttpConfig) mConfig.clone();
         Map<String, String> newHeader = new HashMap<>();
         if (tempConfig.getHeadMap() != null) {
@@ -146,8 +200,8 @@ public class HttpManager {
         return this;
     }
 
-    public HttpManager setLocalHeaders(Map<String, String> tempHeaders) {
-        return setLocalHeaders(tempHeaders, false);
+    public HttpManager setTempHeaders(Map<String, String> tempHeaders) {
+        return setTempHeaders(tempHeaders, false);
     }
 
     /**
@@ -302,10 +356,8 @@ public class HttpManager {
      * @param response
      */
     private void dispatchResponse(int code, ApiException ex, Response response) {
-        if (httpClient != null) {
-            if (httpClient.getInterceptorCallback() != null) {
-                httpClient.getInterceptorCallback().onResponse(code, ex, response);
-            }
+        if (mResponseInterceptorCallback != null) {
+            mResponseInterceptorCallback.onResponse(code, ex, response);
         }
     }
 

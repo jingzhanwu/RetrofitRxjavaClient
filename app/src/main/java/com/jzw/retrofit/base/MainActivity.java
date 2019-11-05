@@ -6,21 +6,26 @@ import android.view.View;
 
 import com.jzw.dev.http.HttpConfig;
 import com.jzw.dev.http.HttpManager;
+import com.jzw.dev.http.callback.OnCookieCallback;
 import com.jzw.dev.http.callback.OnRequestListener;
 import com.jzw.dev.http.exception.ApiException;
 import com.jzw.dev.http.interceptor.OnInterceptorCallback;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import okhttp3.Cookie;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String mToken = "363786482777075712";
+    private String mToken = "388797140820045824";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
                 config.setBaseUrl("https://apidev.lakeapp.cn/");
                 config.setEnableLog(true);
                 config.setHttps(true);
+                config.setEnableCookie(true);
+                config.setEnableNetworkInterceptor(true);
                 config.setHeadMap(map);
 
                 HttpManager.Get().init(config);
@@ -47,21 +54,44 @@ public class MainActivity extends AppCompatActivity {
                     public Request onRequest(Request request) {
                         String token = request.header("Authorization");
                         System.out.println("设置的token：" + token);
-                        Request.Builder builder = request.newBuilder();
-                        builder.removeHeader("Authorization");
-                        builder.addHeader("Authorization", "155555555555");
-
-                        request = builder.build();
+//                        Request.Builder builder = request.newBuilder();
+//                        builder.removeHeader("Authorization");
+//                        builder.addHeader("Authorization", "155555555555");
+//
+//                        request = builder.build();
                         return request;
                     }
 
                     @Override
-                    public void onResponse(int code, ApiException ex, retrofit2.Response response) {
-                        System.out.println("响应code：" + code + "原始code:" + response.code());
+                    public Response onResponse(Response response) {
+                        return response;
                     }
                 });
 
+                HttpManager.Get().setOnCookieCallback(new OnCookieCallback() {
+                    @Override
+                    public void onSaveCookie(HttpUrl url, List<Cookie> cookies, HashMap<String, List<Cookie>> cookieStore) {
+                        System.out.println("监听cookie：" + cookies);
+                    }
 
+                    @Override
+                    public List<Cookie> onSetCookie(HttpUrl url, List<Cookie> savedCookie) {
+                        if (savedCookie == null) {
+                            savedCookie = new ArrayList<>();
+                        }
+                        System.out.println("监听设置cookie：" + url);
+
+                        Cookie cookie = new Cookie.Builder()
+                                .hostOnlyDomain(url.host())
+                                .path(url.encodedPath())
+                                .name("jzw")
+                                .value("com.lake.mgr.cn")
+                                .build();
+
+                        savedCookie.add(cookie);
+                        return savedCookie;
+                    }
+                });
                 get();
             }
         });
@@ -74,13 +104,10 @@ public class MainActivity extends AppCompatActivity {
         HttpManager.Get().request(call, new OnRequestListener<String>() {
             @Override
             public void onSuccess(String s) {
-                System.out.println("结果：" + s);
             }
 
             @Override
             public void onFaild(int code, String msg) {
-
-                System.out.println("错误：" + msg);
             }
         });
     }

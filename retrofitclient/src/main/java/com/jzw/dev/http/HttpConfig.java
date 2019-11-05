@@ -25,7 +25,8 @@ public class HttpConfig implements Cloneable {
     private Map<String, String> mHeadMap = null;
     /*是否开启https，默认false*/
     private boolean mHttps = false;
-
+    /*是否打开NetWorkInterceptor 拦截器*/
+    private boolean mEnableNetworkInterceptor = false;
     /**
      * 设置请求头的baseurl的key值
      */
@@ -116,6 +117,16 @@ public class HttpConfig implements Cloneable {
         return this;
     }
 
+    /**
+     * 是否打开NetWorkInterceptor 拦截器
+     * 打开则能看到network级别的日志打印
+     *
+     * @param enableNetworkInterceptor
+     */
+    public HttpConfig setEnableNetworkInterceptor(boolean enableNetworkInterceptor) {
+        this.mEnableNetworkInterceptor = enableNetworkInterceptor;
+        return this;
+    }
     /****************************************************************************************/
     /************************* get方法，获取设置的各个参数值***********************************/
 
@@ -148,16 +159,8 @@ public class HttpConfig implements Cloneable {
         return mTimeOut;
     }
 
-    @Override
-    public String toString() {
-        return "HttpConfig{" +
-                "mCacheFile='" + mCacheFile + '\'' +
-                ", mBaseUrl='" + mBaseUrl + '\'' +
-                ", mTimeOut=" + mTimeOut +
-                ", mEnableLog=" + mEnableLog +
-                ", mCookie=" + mCookie +
-                ", mHeadMap=" + mHeadMap +
-                '}';
+    public boolean isEnableNetworkInterceptor() {
+        return mEnableNetworkInterceptor;
     }
 
     @Override
@@ -169,5 +172,19 @@ public class HttpConfig implements Cloneable {
             e.printStackTrace();
         }
         return config;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpConfig{" +
+                "mCacheFile='" + mCacheFile + '\'' +
+                ", mBaseUrl='" + mBaseUrl + '\'' +
+                ", mTimeOut=" + mTimeOut +
+                ", mEnableLog=" + mEnableLog +
+                ", mCookie=" + mCookie +
+                ", mHeadMap=" + mHeadMap +
+                ", mHttps=" + mHttps +
+                ", mEnableNetworkInterceptor=" + mEnableNetworkInterceptor +
+                '}';
     }
 }
