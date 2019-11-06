@@ -60,7 +60,6 @@ public class InterceptorUtil {
                 builder.addHeader("Connection", "keep-alive"); //连接保活
                 builder.addHeader("Accept", "*/*");
                 builder.header("Cache-Control", String.format("public, max-age=%d", 60)); //緩存策略
-                builder.addHeader("Cookie", "com.lake.cn");
 
                 //设置默认头信息
                 if (defaultHeadMap != null && defaultHeadMap.size() > 0) {
@@ -83,7 +82,10 @@ public class InterceptorUtil {
                 Response originalResponse = chain.proceed(request);
                 //如果有设置回调，则处理
                 if (callback != null) {
-                    originalResponse = callback.onResponse(originalResponse);
+                    Response rep = originalResponse = callback.onResponse(originalResponse);
+                    if (rep != null) {
+                        originalResponse = rep;
+                    }
                 }
                 return originalResponse;
             }

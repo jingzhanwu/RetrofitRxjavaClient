@@ -3,7 +3,7 @@
 这是一个使用Retrofit2 + Rxjava2 + okhttp3封装的一个简易型的网络请求库
 
   如何引入：
-  compile 'com.jzw:http-retrofit:2.8.1' 引入即可。
+  compile 'com.jzw:http-retrofit:2.8.2' 引入即可。
  
 
  代码中如何使用：
