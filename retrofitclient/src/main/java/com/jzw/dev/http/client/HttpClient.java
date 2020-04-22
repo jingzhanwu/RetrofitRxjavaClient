@@ -9,12 +9,13 @@ import com.jzw.dev.http.interceptor.InterceptorUtil;
 import com.jzw.dev.http.interceptor.OnInterceptorCallback;
 
 import java.io.File;
-import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,16 +27,14 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Cache;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * 创建http客户端
@@ -213,9 +212,10 @@ public final class HttpClient {
         builder.addInterceptor(InterceptorUtil.setBaseUrlInterceptor(config.getBaseUrl()));
         //添加https支持
         if (config.getHttps()) {
-            SSLSocketFactory sslSocketFactory = getSSLFactory();
+            X509TrustManager x590TrustManager = createTrustManager();
+            SSLSocketFactory sslSocketFactory = getSSLSocketFactory(x590TrustManager);
             if (sslSocketFactory != null) {
-                builder.sslSocketFactory(sslSocketFactory);
+                builder.sslSocketFactory(sslSocketFactory, x590TrustManager);
                 builder.hostnameVerifier(getHostnameVerifier());
             }
         }
@@ -260,40 +260,42 @@ public final class HttpClient {
         };
     }
 
-    private SSLSocketFactory getSSLFactory() {
-        SSLSocketFactory sslSocketFactory;
+    private SSLSocketFactory getSSLSocketFactory(X509TrustManager trustManager) {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, getTrustManager(), new SecureRandom());
-            sslSocketFactory = sslContext.getSocketFactory();
-        } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
+            sslContext.init(null, new TrustManager[]{trustManager}, null);
+            SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+            return sslSocketFactory;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return sslSocketFactory;
+        return null;
     }
 
-    //获取TrustManager
-    private TrustManager[] getTrustManager() {
-        TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
+    /**
+     * 创建一个XX509TrustManager
+     *
+     * @return
+     */
+    private X509TrustManager createTrustManager() {
+        X509TrustManager x509TrustManager = new X509TrustManager() {
+            @Override
+            public X509Certificate[] getAcceptedIssuers() {
+                //返回一个证书
+                return new X509Certificate[]{};
+            }
 
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[]{};
-                    }
+            @Override
+            public void checkClientTrusted(X509Certificate[] chain,
+                                           String authType) throws CertificateException {
+            }
 
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] chain,
-                                                   String authType) throws CertificateException {
-                    }
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] chain,
-                                                   String authType) throws CertificateException {
-                    }
-                }
+            @Override
+            public void checkServerTrusted(X509Certificate[] chain,
+                                           String authType) throws CertificateException {
+            }
         };
-        return trustAllCerts;
+        return x509TrustManager;
     }
 
     //获取HostnameVerifier
@@ -306,4 +308,5 @@ public final class HttpClient {
         };
         return hostnameVerifier;
     }
+
 }

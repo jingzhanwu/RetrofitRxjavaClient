@@ -11,14 +11,14 @@
         android:text="初始化" />
 
     <Button
-        android:id="@+id/btn_1"
+        android:id="@+id/btn_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="普通请求" />
+        android:text="模拟登录" />
 
     <Button
-        android:id="@+id/btn_2"
+        android:id="@+id/btn_get"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="添加头" />
+        android:text="普通get请求" />
 </LinearLayout>

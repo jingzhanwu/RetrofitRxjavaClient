@@ -50,4 +50,15 @@ public interface ApiService {
 
     @GET("member/get/default")
     Call<String> banding();
+
+    /**
+     * 登录
+     *
+     * @return
+     */
+    @POST("api/system/login/login")
+    Call<String> login(@Body RequestBody body);
+
+    @GET("api/command-web/system/dictionary/getAllasMap")
+    Call<String> getAllMap();
 }

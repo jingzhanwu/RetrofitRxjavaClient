@@ -1,9 +1,9 @@
 # RetrofitRxjavaClient
 
-这是一个使用Retrofit2 + Rxjava2 + okhttp3封装的一个简易型的网络请求库
+这是一个使用Retrofit2 + Rxjava2封装的一个简易型的网络请求库,支持https
 
   如何引入：
-  compile 'com.jzw:http-retrofit:2.8.2' 引入即可。
+  compile 'com.jzw.net:http:2.8.3' 引入即可。
  
 
  代码中如何使用：
@@ -20,6 +20,7 @@
        HttpManager.Get().init(new HttpConfig()
                                   .setBaseUrl("http://192.168.0.100:8080/")
                                   .setTimeOut(60)
+                                  .setHttps(true)
                                   .setHeadMap(map));
 
         设置请求响应监听拦截器器，处理特殊的响应结果
