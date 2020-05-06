@@ -9,13 +9,8 @@ import com.jzw.dev.http.interceptor.InterceptorUtil;
 import com.jzw.dev.http.interceptor.OnInterceptorCallback;
 
 import java.io.File;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +22,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Cache;
@@ -287,12 +281,12 @@ public final class HttpClient {
 
             @Override
             public void checkClientTrusted(X509Certificate[] chain,
-                                           String authType) throws CertificateException {
+                                           String authType){
             }
 
             @Override
             public void checkServerTrusted(X509Certificate[] chain,
-                                           String authType) throws CertificateException {
+                                           String authType){
             }
         };
         return x509TrustManager;

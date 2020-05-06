@@ -7,6 +7,8 @@
 
   如何引入：
   compile 'com.jzw.net:http:2.8.3' 引入即可。
+  Androidx版本
+  compile 'com.jzw.net:http:3.0.0' 引入即可。
  
 
  代码中如何使用：
