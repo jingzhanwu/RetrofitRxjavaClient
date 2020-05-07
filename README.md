@@ -1,9 +1,17 @@
 # RetrofitRxjavaClient
 
-这是一个使用Retrofit2 + Rxjava2封装的一个简易型的网络请求库,支持https
+### 这是一个使用Retrofit2 + Rxjava2封装的一个简易型的网络请求库,
+**1. 支持https**
+
+**2. 支持Cookie**
+
+**3. 支持Androidx**
 
   如何引入：
   compile 'com.jzw.net:http:2.8.3' 引入即可。
+
+  Androidx版本
+  compile 'com.jzw.net:http:3.0.0' 引入即可。
  
 
  代码中如何使用：

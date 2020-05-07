@@ -1,6 +1,6 @@
 package com.jzw.retrofit.base;
 
-import android.support.annotation.Keep;
+import androidx.annotation.Keep;
 
 import com.jzw.dev.http.entry.RspEntry;
 

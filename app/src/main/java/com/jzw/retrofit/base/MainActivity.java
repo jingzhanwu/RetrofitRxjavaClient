@@ -1,6 +1,6 @@
 package com.jzw.retrofit.base;
 
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
@@ -8,7 +8,6 @@ import com.jzw.dev.http.HttpConfig;
 import com.jzw.dev.http.HttpManager;
 import com.jzw.dev.http.callback.OnCookieCallback;
 import com.jzw.dev.http.callback.OnRequestListener;
-import com.jzw.dev.http.exception.ApiException;
 import com.jzw.dev.http.interceptor.OnInterceptorCallback;
 
 
@@ -47,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 map.put("Authorization", mToken);
 
                 HttpConfig config = new HttpConfig();
-                config.setBaseUrl("https://10.168.4.41/");
+                config.setBaseUrl("https://apidev.lakeapp.cn/");
                 config.setEnableLog(true);
                 config.setHttps(true);
                 config.setEnableCookie(true);
